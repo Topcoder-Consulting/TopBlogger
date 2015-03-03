@@ -1,0 +1,776 @@
+swagger: '2.0'
+info:
+  title: TopBlogger REST API
+  description: |
+    REST API for TopBlogger.
+  version: "0.0.1"
+# the domain of the service
+# TODO to be updated for final deployment
+host: sample.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+security:
+  - topBloggerAuth:
+      - read
+      - write_blog
+      - write_comment
+securityDefinitions:
+  topBloggerAuth:
+    type: oauth2
+    description: The OAuth 2 security scheme used by the TopBlogger APIs
+    flow: accessCode
+    authorizationUrl: https://security.example.com/ar/api/auth/authorize #TODO to be updated in final deployment
+    tokenUrl: https://security.example.com/ar/api/auth/token             #TODO to be updated in final deployment
+    scopes:   #TODO to be updated in final deployment
+      read: scope to read all the user-related information
+      write_blog: scope to write the user-related blogs
+      write_comment: scope to write the user-related comments
+
+paths:
+  /blogs:
+    post:
+      summary: Create a Blog
+      description: |
+        This method will create a blog.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: blog
+          in: body
+          description: The blog to create
+          required: true
+          schema:
+            $ref: '#/definitions/Blog'
+      responses:
+        201:
+          description: The created blog
+          schema:
+            $ref: '#/definitions/Blog'
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      summary: List Blogs
+      description: |
+        This method returns the blogs that matches filter.
+      parameters:
+        - name: handle
+          in: query
+          description: This is used to search the blogs by Topcoder handle of author.
+          required: false
+          type: string
+        - name: slug
+          in: query
+          description: This is used to search the blogs by slug.
+          required: false
+          type: string
+        - name: tags
+          in: query
+          description: This is used to search the blogs by tags. This criteria is separated by commas. The blog is considered matched if the blog contains at least one tag in this criteria.
+          required: false
+          type: string
+        - name: title
+          in: query
+          description: This is used to search the blogs by title.
+          required: false
+          type: string
+        - name: keyword
+          in: query
+          description: This is used to search the blogs by keyword. The blog is considered matched if the title or content or tags contains the keyword.
+          required: false
+          type: string
+        - name: publishedDateFrom
+          in: query
+          description: This should be in epoch time representation. The blog is considered matched if it's published after this time.
+          required: false
+          type: integer
+          format: int64
+        - name: publishedDateTo
+          in: query
+          description: This should be in epoch time representation. The blog is considered matched if it's published before this time.
+          required: false
+          type: integer
+          format: int64
+        - name: limit
+          in: query
+          description: The record size limit for pagination, by default it is 10. If it is -1, all blogs of the challenge will be returned.
+          required: false
+          type: integer
+          format: int32
+        - name: offset
+          in: query
+          description: The starting index for pagination, starting from 0. By default it is 0
+          required: false
+          type: integer
+          format: int32
+        - name: sortBy
+          in: query
+          required: false
+          type: string
+          description: The sorting fields. OPTIONAL. "publishedDate", "numOfComments", "numOfViews", "numOfUpVotes", "numOfDownVotes" are allowed. The default value is "publishedDate".
+        - name: sortType
+          in: query
+          required: false
+          type: string
+          description: The sorting type. OPTIONAL. "asc", "desc" are allowed. The default value is "desc".
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - read
+      responses:
+        200:
+          description: An array of blogs
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int32
+                description: The count of all matched blogs.
+              totalPages:
+                type: integer
+                format: int32
+                description: The total pages of all matched blogs.
+              values:
+                type: array
+                items:
+                  $ref: '#/definitions/Blog'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{slug}:
+    get:
+      summary: Get a Blog by slug.
+      description: |
+        This method will get a blog by the slug.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - read
+      parameters:
+        - name: slug
+          in: path
+          description: The slug of blog.
+          required: true
+          type: string
+      responses:
+        200:
+          description: The blog with given slug.
+          schema:
+            $ref: '#/definitions/Blog'
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{id}:
+    put:
+      summary: Update a Blog.
+      description: |
+        This method will update a blog. It can only be done by the author of blog.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog.
+          required: true
+          type: integer
+          format: int64
+        - name: blog
+          in: body
+          description: The blog to update.
+          required: true
+          schema:
+            $ref: '#/definitions/Blog'
+      responses:
+        200:
+          description: The updated blog
+          schema:
+            $ref: '#/definitions/Blog'
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      summary: Get a Blog by ID.
+      description: |
+        This method will get a blog by ID.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - read
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog with given ID.
+          schema:
+            $ref: '#/definitions/Blog'
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a Blog by ID.
+      description: |
+        This method will delete a blog by ID. It can only be done by the author of blog. Both of published or unpublished blogs can be deleted.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog with given ID is deleted.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{id}/publish:
+    post:
+      summary: Publish a Blog
+      description: |
+        This method will publish a unpublished blog. It can only be done by the author of blog.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The publishd blog
+          schema:
+            $ref: '#/definitions/Blog'
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{id}/view:
+    post:
+      summary: Mark a Blog as Viewed
+      description: |
+        This method will mark a blog as viewed by current user. A blog can be marked as viewed by the same user for at most once. The current user should not be the author of blog.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog is marked as viewed by current user.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{id}/upvote:
+    post:
+      summary: Up-Vote a Blog
+      description: |
+        This method will up-vote a blog by current user. A blog can be up-voted by the same user for at most once. The author of blog cannot vote for the his/her blog.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog is up-voted by current user.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{id}/votes/downvote:
+    post:
+      summary: Down-Vote a Blog
+      description: |
+        This method will down-vote a blog by current user. A blog can be up-voted by the same user for at most once. The author of blog cannot vote for the his/her blog.
+      tags:
+        - Blog
+      security:
+        - topBloggerAuth:
+          - write_blog
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog is down-voted by current user.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{id}/comments:
+    post:
+      summary: Add a Comment
+      description: |
+        This method will add a comment for the blog.
+      tags:
+        - Blog
+        - Comment
+      security:
+        - topBloggerAuth:
+          - write_comment
+      parameters:
+        - name: id
+          in: path
+          description: The ID of blog.
+          required: true
+          type: integer
+          format: int64
+        - name: comment
+          in: body
+          description: The comment to add.
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+      responses:
+        200:
+          description: The created comment
+          schema:
+            $ref: '#/definitions/Comment'
+        400:
+          description: The input is not valid.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{blogId}/comments/{commentId}:
+    put:
+      summary: Update a Comment
+      description: |
+        This method will update a comment. It can only be done by the author of comment.
+      tags:
+        - Blog
+        - Comment
+      security:
+        - topBloggerAuth:
+          - write_comment
+      parameters:
+        - name: blogId
+          in: path
+          description: The ID of blog.
+          required: true
+          type: integer
+          format: int64
+        - name: commentId
+          in: path
+          description: The ID of comment.
+          required: true
+          type: integer
+          format: int64
+        - name: comment
+          in: body
+          description: The comment to update
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+      responses:
+        200:
+          description: The updated comment
+          schema:
+            $ref: '#/definitions/Comment'
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a Comment
+      description: |
+        This method will delete a comment. It can only be done by the author of comment, or the author of blog.
+      tags:
+        - Blog
+        - Comment
+      security:
+        - topBloggerAuth:
+          - write_comment
+      parameters:
+        - name: blogId
+          in: path
+          description: The ID of blog.
+          required: true
+          type: integer
+          format: int64
+        - name: commentId
+          in: path
+          description: The ID of comment.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The comment is deleted.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{blogId}/comments/{commentId}/like:
+    post:
+      summary: Like a Comment
+      description: |
+        This method will make a comment as liked by current user. The author of comment cannot mark the his/her comment as liked.
+      tags:
+        - Blog
+        - Comment
+      security:
+        - topBloggerAuth:
+          - write_comment
+      parameters:
+        - name: blogId
+          in: path
+          description: The ID of blog
+          required: true
+          type: integer
+          format: int64
+        - name: commentId
+          in: path
+          description: The ID of comment
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog is marked as liked by current user.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /blogs/{blogId}/comments/{commentId}/dislike:
+    post:
+      summary: Dislike a Comment
+      description: |
+        This method will make a comment as disliked by current user. The author of comment cannot mark the his/her comment as disliked.
+      tags:
+        - Blog
+        - Comment
+      security:
+        - topBloggerAuth:
+          - write_comment
+      parameters:
+        - name: blogId
+          in: path
+          description: The ID of blog
+          required: true
+          type: integer
+          format: int64
+        - name: commentId
+          in: path
+          description: The ID of comment
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: The blog is marked as disliked by current user.
+        400:
+          description: The input is not valid
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: The user is not allowed to perform the update on the resource.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: The requested resource doesn't exists
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Blog:
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: Unique identifier of the blog
+      title:
+        type: string
+        description: The title of the blog
+      slug:
+        type: string
+        description: The slug of the blog (so if the title is "My First Java Post", the slug would be "my-first-java-post")
+      publishedDate:
+        type: integer
+        format: int64
+        description: The published date of the blog, in the epoch time representation.
+      createdDate:
+        type: integer
+        format: int64
+        description: The created date of the blog, in the epoch time representation.
+      lastUpdateedDate:
+        type: integer
+        format: int64
+        description: The last update date of the blog, in the epoch time representation.
+      author:
+        $ref: '#/definitions/User'
+        description: The author of blog.
+      tags:
+        type: array
+        description: The list of blog tags.
+        items:
+          $ref: '#/definitions/Tag'
+      content:
+        type: string
+        description: The actual content of the blog.
+      isPublished:
+        type: boolean
+        description: The flag indicating if the blog is published.
+      comments:
+        type: array
+        description: The list of comments on the blog.
+        items:
+          $ref: '#/definitions/Comment'
+      numOfViews:
+        type: integer
+        format: int32
+        description: The count of views for the blog.
+      numOfUpVotes:
+        type: integer
+        format: int32
+        description: The count of up-votes for the blog.
+      numOfDownVotes:
+        type: integer
+        format: int32
+        description: The count of down-votes for the blog.
+  Tag:
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: The ID of the tag.
+      name:
+        type: string
+        description: The tag name (which is all that the tag is about).
+  Comment:
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: The ID of comment
+      content:
+        type: string
+        description: The content of comment
+      postedDate:
+        type: integer
+        format: int64
+        description: The date time when the comment is posted. It is in epoch time representation.
+      lastUpdatedDate:
+        type: integer
+        format: int64
+        description: The last date time when the comment is updated. It is in epoch time representation.
+      author:
+        $ref: '#/definitions/User'
+        description: The author of blog.
+      numOfLikes:
+        type: integer
+        format: int32
+        description: The count of likes for the blog.
+      numOfDislikes:
+        type: integer
+        format: int32
+        description: The count of dislikes for the blog.
+  Error:
+    properties:
+      code:
+        type: string
+        description: The error code that refers the error type.
+      message:
+        type: string
+        description: The error message.
+  User:
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: The id of user.
+      Handle:
+        type: string
+        description: The Topcoder handle of user.

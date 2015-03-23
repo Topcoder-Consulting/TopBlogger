@@ -3,7 +3,7 @@ info:
   title: TopBlogger REST API
   description: |
     REST API for TopBlogger.
-  version: "0.0.1"
+  version: "0.0.0"
 # the domain of the service
 # TODO to be updated for final deployment
 host: sample.com
@@ -149,39 +149,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Blog'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /blogs/{slug}:
-    get:
-      summary: Get a Blog by slug.
-      description: |
-        This method will get a blog by the slug.
-      tags:
-        - Blog
-      security:
-        - topBloggerAuth:
-          - read
-      parameters:
-        - name: slug
-          in: path
-          description: The slug of blog.
-          required: true
-          type: string
-      responses:
-        200:
-          description: The blog with given slug.
-          schema:
-            $ref: '#/definitions/Blog'
-        400:
-          description: The input is not valid
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: The requested resource doesn't exists
-          schema:
-            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:

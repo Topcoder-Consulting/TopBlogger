@@ -1,0 +1,16 @@
+TopBlogger -- Implement OAuth2 for Node API
+------------------------------------------------------------
+Submission details a click away...
+
+
+Screen cast video URL:
+----------------------
+http://youtu.be/PN-3_jVbmGY
+
+Deployment Guide
+----------------
+Look in ./docs/ folder. It is a .doc file.
+
+Please also read because there is important discussion there
+------------------------------------------------------------
+http://apps.topcoder.com/forums/?module=Thread&threadID=850514&start=0

@@ -1,2 +1,14 @@
 <h1>{{title}}</h1>
 <p>Welcome to {{title}}</p>
+{{#if user}}
+<p>You are currently logged in as <strong>{{user.username}}, TC handle: {{user.handle}}</strong>
+</p>
+<p>Your API JWT is:
+    <br>
+    <textarea cols="100">{{user.JWT}}</textarea>
+    <br>
+    <em>You can use it to access TopBlogger APIs.</em>
+</p>
+<a href="/logout">Logout</a> {{else}}
+<p>You are currently not logged in. Plaese <a href="/login">login</a> or <a href="/register">register</a>.</p>
+{{/if}}

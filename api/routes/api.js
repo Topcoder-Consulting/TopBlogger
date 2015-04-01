@@ -14,6 +14,7 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var config = require('../config/config');
 var User = require('../models/User');
+var blogController = require('../controller/blog');
 
 /**
  * Validates API JWT tokens.
@@ -82,5 +83,9 @@ router.get('/secret', AuthChecker, function (req, res) {
         message: "SUCCESS!!"
     });
 });
+/*API endpoint which gets the blog id */
+
+router.route('/blogs/:blog_id')
+    .get(blogController.getBlog);
 
 module.exports = router;

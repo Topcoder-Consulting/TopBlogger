@@ -79,7 +79,7 @@ router.get('/', function (req, res) {
 /* API endpoint which require auth. */
 router.get('/secret', AuthChecker, function (req, res) {
     res.json({
-        version: 1.0
+        message: "SUCCESS!!"
     });
 });
 

@@ -5,7 +5,7 @@
  * Represents the TopBlogger app main file.
  *
  * @version 1.0
- * @author kiri4a
+ * @author jeffdonthemic
  */
 "use strict";
 
@@ -17,18 +17,19 @@ var cookieParser = require('cookie-parser');
 var session = require('cookie-session');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var api = require('./routes/api');
-var user_auth_routes = require('./routes/user_auth');
+
 var app = express();
+app.set('port', process.env.PORT || 3000);
+
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+
 var User = require('./models/User');
 var config = require('./config/config');
 
-
-app.set('port', process.env.PORT || 3000);
+var routes = require('./routes/index');
+var api = require('./routes/api');
+var user_auth_routes = require('./routes/user_auth');
 
 /**
  * Connect to MongoDB.
@@ -66,7 +67,6 @@ passport.deserializeUser(User.deserializeUser());
 
 // Register routes.
 app.use('/', routes);
-app.use('/users', users);
 app.use('/', user_auth_routes);
 app.use('/api', api);
 

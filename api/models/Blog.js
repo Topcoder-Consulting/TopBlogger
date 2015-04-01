@@ -1,12 +1,19 @@
+/*
+ * Copyright (C) 2015 TopCoder Inc., All Rights Reserved.
+ */
+/**
+ * Represents the user model.
+ *
+ * @version 1.0
+ * @author LOYEER
+ */
+
 var mongoose = require('mongoose');
+var User = require('../models/User');
+var Tag = require('../models/Tag');
+var Comment = require('../models/Comment');
 
 var blogSchema = new mongoose.Schema({
-    _id: {
-        type: Number,
-        required: true,
-        index: true, 
-        unique: true
-    },
     title: {
         type: String,
         required: true
@@ -23,12 +30,12 @@ var blogSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    lastUpdateedDate: {
+    lastUpdatedDate: {
         type: Number,
         required: true
     },
     author: {
-        type: User,
+        type: mongoose.Schema.Types.ObjectId, ref: 'User',
         required: true,
         meta: {
             _id: {

@@ -10,9 +10,8 @@
 "use strict";
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
 var passportLocalMongoose = require('passport-local-mongoose');
-var User = new Schema({
+var User = new mongoose.Schema({
     handle: {
         type: String,
         required: true

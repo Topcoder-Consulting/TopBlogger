@@ -26,8 +26,10 @@ router.get('/', function (req, res) {
 router.get('/tmp/load', function (req, res) {
 
   var jeffdonthemic = new User({
-    handle: 'jeffdonthemic'
+    handle: 'a',
+    JWT: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImEiLCJoYW5kbGUiOiJhIiwiaWF0IjoxNDI3OTEzNzk5fQ.f-vl6KhO24kzEDyCvqPjWym4hc_X5LOHJVR7SPtWGr8'
   });
+  jeffdonthemic.save();
 
   var b1 = new Blog({
     author: jeffdonthemic,

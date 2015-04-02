@@ -27,7 +27,7 @@ describe('Getting Blog test', function () {
 describe('Deleting Blog test using POST /blogs/{id}', function () {
 
     var sampleUser1, sampleUser2, sampleBlog1;
-    before(function() {
+    before(function(done) {
         sampleUser1 = new User({
           handle: 'a',
           JWT: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImEiLCJoYW5kbGUiOiJhIiwiaWF0IjoxNDI3OTEzNzk5fQ.f-vl6KhO24kzEDyCvqPjWym4hc_X5LOHJVR7SPtWGr8'
@@ -48,7 +48,9 @@ describe('Deleting Blog test using POST /blogs/{id}', function () {
           lastUpdatedDate: (new Date).getTime(),
           slug: 'slug1'
         });
-        sampleBlog1.save();
+        sampleBlog1.save(function() {
+            done();
+        });
     })
 
     it('should return 403 when user othen than author tries to delete a post', function(done) {

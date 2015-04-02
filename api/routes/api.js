@@ -70,6 +70,8 @@ var AuthChecker = function (req, res, next) {
     }
 };
 
+exports.AuthChecker = AuthChecker;
+
 /* API root. */
 router.get('/', function (req, res) {
     res.json({

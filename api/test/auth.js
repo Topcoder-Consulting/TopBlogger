@@ -11,6 +11,7 @@
 
 var request = require('supertest');
 var app = require('../app');
+var config = require('./config/tests_config');
 
 describe('TopBlogger app API auth', function () {
 
@@ -46,6 +47,15 @@ describe('TopBlogger app API auth', function () {
             .set('Authorization', 'asdasdasd')
             .expect('Content-Type', /json/)
             .expect(401, done);
+    });
+
+    it('should return 200 for valid JWT token', function (done) {
+        request(app)
+            .get('/api/secret')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(200, done);
     });
 });
 

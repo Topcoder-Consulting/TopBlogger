@@ -20,4 +20,17 @@ describe('Getting Blog test', function () {
            		done();
            	})
     });
+
+    it('Check function for adding comments', function (done) {
+
+       
+        request(app)
+            .post('/api/blogs/551d23e240d785c3059c9c06/comments')
+            .send({"contentText":"sggge"})
+            .expect(200)
+            .expect("data is stored",done)
+           
+    });
+
+
 });

@@ -88,4 +88,7 @@ router.get('/secret', AuthChecker, function (req, res) {
 router.route('/blogs/:blog_id')
     .get(blogController.getBlog);
 
+router.route('/blogs/:blog_id/comments')
+    .post(blogController.addComments);
+
 module.exports = router;

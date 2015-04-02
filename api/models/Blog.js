@@ -74,7 +74,7 @@ var blogSchema = new mongoose.Schema({
         required: true
     },
     comments: {
-        type: [Comment],
+        type: [Comment.schema],
         meta: {
             _id: {
                 type: Number,

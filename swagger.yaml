@@ -149,10 +149,15 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Blog'
+        400:
+          description: The input or filter is not valid
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+
   /blogs/{id}:
     put:
       summary: Update a Blog.

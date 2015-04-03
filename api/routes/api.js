@@ -84,6 +84,9 @@ router.get('/secret', AuthChecker, function (req, res) {
     });
 });
 
+/* API endpoint to like a comment */
+router.post('/blogs/:blogId/comments/:commentId/like', AuthChecker, blogController.likeBlogComment);
+
 /* API endpoint which gets the blog id */
 router.route('/blogs/:blog_id')
     .get(blogController.getBlog);

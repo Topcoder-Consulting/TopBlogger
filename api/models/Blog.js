@@ -74,7 +74,7 @@ var blogSchema = new mongoose.Schema({
         required: true
     },
     comments: {
-        type: [Comment],
+        type: [Comment.schema],
         meta: {
             _id: {
                 type: Number,
@@ -119,7 +119,17 @@ var blogSchema = new mongoose.Schema({
                 type: Number,
                 required: true,
                 default: 0
-            }
+            },
+            likeUsers: [ {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User'
+                }
+            ],
+            dislikeUsers: [ {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User'
+                }
+            ]
         }
     },
     numOfViews: {
@@ -136,7 +146,7 @@ var blogSchema = new mongoose.Schema({
         type: Number,
         required: true,
         default: 0
-    }
+    },
 });
 
 module.exports = mongoose.model('Blog', blogSchema);

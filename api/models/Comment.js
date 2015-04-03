@@ -22,7 +22,7 @@ var Comment = new mongoose.Schema({
         type: String,
         required: true
     },
-    lastUpdateedDate: {
+    lastUpdatedDate: {
         type: Number,
         required: true
     },
@@ -39,7 +39,17 @@ var Comment = new mongoose.Schema({
     postedDate: {
         type: Number,
         required: true
-    }
+    },
+    likeUsers: [ {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
+    dislikeUsers: [ {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ]
 });
 
 module.exports = mongoose.model('Comment', Comment);

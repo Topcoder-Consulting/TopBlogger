@@ -52,9 +52,7 @@ describe('Getting Blog Api test', function () {
     it('Check function for adding comments', function (done) {
         
         var isValidOrg = function(res) {
-            console.log("what is this " + res.body.comments[0].content);
             var textCommented = res.body.comments[0].content;
-            console.log(textCommented);
             assert.equal(textCommented,'sgsfsgge')
         };
         request(app)

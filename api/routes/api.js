@@ -83,9 +83,12 @@ router.get('/secret', AuthChecker, function (req, res) {
         message: "SUCCESS!!"
     });
 });
-/*API endpoint which gets the blog id */
 
+/* API endpoint which gets the blog id */
 router.route('/blogs/:blog_id')
     .get(blogController.getBlog);
+
+/* API endpoint which publish a unpublished blog. */
+router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 
 module.exports = router;

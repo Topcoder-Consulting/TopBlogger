@@ -1,10 +1,32 @@
 
 var request = require('supertest');
 var app = require('../app');
+var Blog = require('../models/Blog');
+var User = require('../models/User');
+var assert = require('assert');
 
-describe('Getting Blog test', function () {
+describe('Getting Blog Api test', function () {
 
-    
+    var user,Blog1;
+    before(function(done) {
+        
+         user = new User({
+             handle: 'jeffdonthemic'
+        });
+
+         Blog1 = new Blog({
+            author: user,
+            title: 'Blog Title for test',
+            content: 'This is a sample blog content for test',
+            isPublished: false,
+            createdDate: (new Date).getTime(),
+            lastUpdatedDate: (new Date).getTime(),
+            slug: 'slug1'
+        });
+        Blog1.save(function() {
+            done();
+        });
+     });
 
     it('should return 200 response while accessing api', function (done) {
         request(app)
@@ -21,15 +43,29 @@ describe('Getting Blog test', function () {
            	})
     });
 
-    it('Check function for adding comments', function (done) {
+   
 
-       
+    /*
+        Check whether the comment has been added or not'
+    */
+
+    it('Check function for adding comments', function (done) {
+        
+        var isValidOrg = function(res) {
+            console.log("what is this " + res.body.comments[0].content);
+            var textCommented = res.body.comments[0].content;
+            console.log(textCommented);
+            assert.equal(textCommented,'sgsfsgge')
+        };
         request(app)
-            .post('/api/blogs/551d23e240d785c3059c9c06/comments')
+            .post('/api/blogs/' + Blog1._id + '/comments')
             .send({"contentText":"sggge"})
             .expect(200)
-            .expect("data is stored",done)
-           
+            .expect(isValidOrg)
+            .end(done)
+          
+         
+            
     });
 
 

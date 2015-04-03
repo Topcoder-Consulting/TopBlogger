@@ -20,7 +20,7 @@ exports.addComments = function(req,res) {
 			res.send(err);
 			return;
 		}
-
+		
 		var comment = new Comment({
 			author: req.user,
       		content: req.body.contentText,
@@ -35,12 +35,10 @@ exports.addComments = function(req,res) {
 				res.send(err);
 				return;
 			}
-			if (!err) console.log("Inserted");
+			if (!err) {
+				res.json(blog);
+			}
 		});
-
-		res.json(blog);
-		
-
-});
+	});
 
 }

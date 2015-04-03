@@ -1,4 +1,4 @@
-
+var assert = require('assert');
 var request = require('supertest');
 var app = require('../app');
 var Blog = require('../models/Blog');
@@ -65,24 +65,20 @@ describe('Liking blog comment', function() {
                         postedDate: (new Date()).getTime()
                     });
 
-                    testComment.save(function(err) {
-                        if (err) throw err;
-
-                        testBlog = new Blog({
-                            author: testUser,
-                            title: 'Test Title',
-                            content: 'Test content',
-                            isPublished: false,
-                            createdDate: (new Date()).getTime(),
-                            lastUpdatedDate: (new Date()).getTime(),
-                            slug: 'test-title',
-                            comments: [
-                                testComment
-                            ]
-                        });
-
-                        testBlog.save(callback);
+                    testBlog = new Blog({
+                        author: testUser,
+                        title: 'Test Title',
+                        content: 'Test content',
+                        isPublished: false,
+                        createdDate: (new Date()).getTime(),
+                        lastUpdatedDate: (new Date()).getTime(),
+                        slug: 'test-title',
+                        comments: [
+                            testComment
+                        ]
                     });
+
+                    testBlog.save(callback);
                 });
             });
         });
@@ -98,7 +94,16 @@ describe('Liking blog comment', function() {
                     throw err;
                 }
 
-                callback();
+                Blog.findById(testBlog._id, function(err, blog) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    assert.strictEqual(1, blog.comments[0].numOfLikes);
+                    assert.deepEqual(testUser2._id, blog.comments[0].likeUsers[0]);
+
+                    callback();
+                });
             });
     });
 

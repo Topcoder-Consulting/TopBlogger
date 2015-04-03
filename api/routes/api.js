@@ -15,6 +15,7 @@ var jwt = require('jsonwebtoken');
 var config = require('../config/config');
 var User = require('../models/User');
 var blogController = require('../controller/blog');
+var blogService = require('../services/blog');
 
 /**
  * Validates API JWT tokens.
@@ -87,5 +88,18 @@ router.get('/secret', AuthChecker, function (req, res) {
 
 router.route('/blogs/:blog_id')
     .get(blogController.getBlog);
+
+/*API get blogs by filters*/ 
+router.get('/blogs',AuthChecker,function(req,res){
+    blogService.getBlogs(req.query,function(err,blogs){
+        if(err){ 
+            res.status(err.code).json({
+                'message' : err.message 
+            });
+        }
+        else 
+            res.json(blogs);
+    });
+});
 
 module.exports = router;

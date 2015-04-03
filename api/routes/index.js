@@ -25,8 +25,13 @@ router.get('/', function (req, res) {
 /* adds some data */
 router.get('/tmp/load', function (req, res) {
 
+  /*
   var jeffdonthemic = new User({
     handle: 'jeffdonthemic'
+  });
+  jeffdonthemic.save(function(err,result){
+    if(err) console.log(err);
+    if(!err) console.log(result); 
   });
 
   var b1 = new Blog({
@@ -70,6 +75,8 @@ router.get('/tmp/load', function (req, res) {
     if (err) console.log(err);
     if (!err) console.log('Inserted ' + b3.title);
   })
+  */ 
+  require('../test/loadTestBlogs').loadBlogs();
 
   res.json({message: "data loaded"});
 });

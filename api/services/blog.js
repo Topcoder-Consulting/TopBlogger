@@ -194,14 +194,16 @@ function getBlogs(filter,callback){
                 });
 
             sortType = filter.sortType; 
-        }
+        } 
+        var sortCriteria = {}; 
+        sortCriteria[sortBy] = sortType;
 
         //return only published blogs
         condition.isPublished = true;
 
         //make a mongoose query
         var query = Blog.find(condition)
-            .sort({sortBy:sortType})
+            .sort(sortCriteria)
             .populate('author','handle _id')
             .populate('tags','name _id')
             .populate('comments','author.handle author._id content _id lastUpdatedDate numOfDislikes numOfLikes postedDate');

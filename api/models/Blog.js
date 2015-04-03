@@ -73,55 +73,11 @@ var blogSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-    comments: {
-        type: [Comment],
-        meta: {
-            _id: {
-                type: Number,
-                required: true,
-                index: true,
-                unique: true
-            },
-            content: {
-                type: String,
-                required: true
-            },
-            postedDate: {
-                type: Number,
-                required: true
-            },
-            lastUpdatedDate: {
-                type: Number,
-                required: true
-            },
-            author: {
-                type: User,
-                required: true,
-                meta: {
-                    _id: {
-                        type: Number,
-                        required: true,
-                        index: true,
-                        unique: true
-                    },
-                    handle: {
-                        type: String,
-                        required: true
-                    }
-                }
-            },
-            numOfLikes: {
-                type: Number,
-                required: true,
-                default: 0
-            },
-            numOfDislikes: {
-                type: Number,
-                required: true,
-                default: 0
-            }
+    comments: [ {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
         }
-    },
+    ],
     numOfViews: {
         type: Number,
         required: true,
@@ -136,7 +92,7 @@ var blogSchema = new mongoose.Schema({
         type: Number,
         required: true,
         default: 0
-    }
+    },
 });
 
 module.exports = mongoose.model('Blog', blogSchema);

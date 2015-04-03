@@ -12,6 +12,7 @@
 var express = require('express');
 var router = express.Router();
 var Blog = require('../models/Blog');
+var Comment = require('../models/Comment');
 var User = require('../models/User');
 
 /* GET home page. */
@@ -29,6 +30,39 @@ router.get('/tmp/load', function (req, res) {
     handle: 'jeffdonthemic'
   });
 
+  jeffdonthemic.save(function(err, result) {
+    if (err) console.log(err);
+    if (!err) console.log('Inserted jeffdonthemic user');
+  });
+
+  var c1 = new Comment({
+    author: jeffdonthemic,
+    content: 'content',
+    lastUpdatedDate: (new Date()).getTime(),
+    numOfDislikes: 0,
+    numOfLikes: 0,
+    postedDate: (new Date()).getTime()
+  });
+
+  c1.save(function(err, result) {
+    if (err) console.log(err);
+    if (!err) console.log('Inserted c1 comment');
+  });
+
+  var c2 = new Comment({
+    author: jeffdonthemic,
+    content: 'content 2',
+    lastUpdatedDate: (new Date()).getTime(),
+    numOfDislikes: 0,
+    numOfLikes: 0,
+    postedDate: (new Date()).getTime()
+  });
+
+  c2.save(function(err, result) {
+    if (err) console.log(err);
+    if (!err) console.log('Inserted c2 comment');
+  });
+
   var b1 = new Blog({
     author: jeffdonthemic,
     title: 'Blog Title #1',
@@ -36,7 +70,8 @@ router.get('/tmp/load', function (req, res) {
     isPublished: false,
     createdDate: (new Date).getTime(),
     lastUpdatedDate: (new Date).getTime(),
-    slug: 'slug1'
+    slug: 'slug1',
+    comments: [ c1, c2 ]
   });
   b1.save(function(err, result){
     if (err) console.log(err);

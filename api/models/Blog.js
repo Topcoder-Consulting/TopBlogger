@@ -73,11 +73,65 @@ var blogSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-    comments: [ {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment'
+    comments: {
+        type: [Comment.schema],
+        meta: {
+            _id: {
+                type: Number,
+                required: true,
+                index: true,
+                unique: true
+            },
+            content: {
+                type: String,
+                required: true
+            },
+            postedDate: {
+                type: Number,
+                required: true
+            },
+            lastUpdatedDate: {
+                type: Number,
+                required: true
+            },
+            author: {
+                type: User,
+                required: true,
+                meta: {
+                    _id: {
+                        type: Number,
+                        required: true,
+                        index: true,
+                        unique: true
+                    },
+                    handle: {
+                        type: String,
+                        required: true
+                    }
+                }
+            },
+            numOfLikes: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+            numOfDislikes: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+            likeUsers: [ {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User'
+                }
+            ],
+            dislikeUsers: [ {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User'
+                }
+            ]
         }
-    ],
+    },
     numOfViews: {
         type: Number,
         required: true,

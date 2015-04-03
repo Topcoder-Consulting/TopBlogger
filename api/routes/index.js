@@ -44,11 +44,6 @@ router.get('/tmp/load', function (req, res) {
     postedDate: (new Date()).getTime()
   });
 
-  c1.save(function(err, result) {
-    if (err) console.log(err);
-    if (!err) console.log('Inserted c1 comment');
-  });
-
   var c2 = new Comment({
     author: jeffdonthemic,
     content: 'content 2',
@@ -56,11 +51,6 @@ router.get('/tmp/load', function (req, res) {
     numOfDislikes: 0,
     numOfLikes: 0,
     postedDate: (new Date()).getTime()
-  });
-
-  c2.save(function(err, result) {
-    if (err) console.log(err);
-    if (!err) console.log('Inserted c2 comment');
   });
 
   var b1 = new Blog({

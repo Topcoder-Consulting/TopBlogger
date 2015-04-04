@@ -98,7 +98,6 @@ router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 router.post('/blogs', function (req, res) {
     blogController.createBlog(req, res, function(err, blog) {
         if (err) {
-            console.log(err);
             if (err.name === 'ValidationError') {
                 res.status(400).json({
                     "code": 400,

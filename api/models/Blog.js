@@ -35,7 +35,7 @@ var blogSchema = new mongoose.Schema({
         required: true
     },
     author: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        type: [User.schema],
         required: true,
         meta: {
             _id: {
@@ -51,7 +51,7 @@ var blogSchema = new mongoose.Schema({
         }
     },
     tags: {
-        type: [Tag],
+        type: [Tag.schema],
         meta: {
             _id: {
                 type: Number,

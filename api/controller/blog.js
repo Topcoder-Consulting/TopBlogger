@@ -8,6 +8,7 @@
  * @author kiri4a and other
  */
 
+var service = require('../services/BlogService');
 var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
 
@@ -133,3 +134,19 @@ exports.likeBlogComment = function(req, res, next) {
 
     });
 };
+
+/**
+ * Creates a new blog.
+ *
+ * @param {Object} req the expressJS request object
+ * @param {Object} res the expressJS response object
+ * @param {Function} callback the callback function it is given the following parameters
+ *    1) error - execution errors encountered (if any)
+ *    2) blog - the created object
+ */
+exports.createBlog = function(req, res, callback) {
+	service.createBlog(req.body, function(err, blog) {
+		callback(err, blog);
+	});
+
+}

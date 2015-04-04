@@ -94,4 +94,26 @@ router.route('/blogs/:blog_id')
 /* API endpoint which publish a unpublished blog. */
 router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 
+/* API endpoint which creates a new blog. */
+router.post('/blogs', function (req, res) {
+    blogController.createBlog(req, res, function(err, blog) {
+        if (err) {
+            console.log(err);
+            if (err.name === 'ValidationError') {
+                res.status(400).json({
+                    "code": 400,
+                    "message": err.message
+                });
+            } else {
+                res.status(err.status || 500).json({
+                    "code": err.status || 500,
+                    "message": err.message || 'Unable to process request.'
+                });
+            }
+        } else {
+            res.status(201).json(blog);
+        }
+    });
+});
+
 module.exports = router;

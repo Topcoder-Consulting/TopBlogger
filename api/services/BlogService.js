@@ -12,6 +12,8 @@
 "use strict";
 
 var async = require('async');
+var slugify = require('slugify');
+
 var Blog = require('../models/Blog');
 var User = require('../models/User');
 var Tag = require('../models/Tag');
@@ -58,7 +60,7 @@ exports.createBlog = function(blog, callback) {
         function(blogInput, cb) {
             var blog = new Blog({
                 "title": blogInput.title,
-                "slug": blogInput.slug,
+                "slug": slugify(blogInput.title),
                 "publishedDate": blogInput.publishedDate,
                 "createdDate": blogInput.createdDate,
                 "lastUpdatedDate": blogInput.lastUpdatedDate,

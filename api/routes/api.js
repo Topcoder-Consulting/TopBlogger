@@ -94,4 +94,8 @@ router.route('/blogs/:blog_id')
 /* API endpoint which publish a unpublished blog. */
 router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 
+/* API endpoint which to dislike a comment */
+router.post('/blogs/:blog_id/comments/:comment_id/dislike', AuthChecker,blogController.getBlogService, blogController.getCommentService, blogController.dislikeComment);
+
+
 module.exports = router;

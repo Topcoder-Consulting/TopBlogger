@@ -118,7 +118,7 @@ describe('Liking blog comment', function() {
                             testComment
                         ]
                     });
-
+					Blog.find({ }).remove().exec();
                     testBlog.save(callback);
                 });
             });
@@ -189,3 +189,159 @@ describe('Liking blog comment', function() {
              });
      });
 });
+
+
+ describe('Disliking a comment', function () {
+	var testUser, testComment, testBlog ,myTestComment;
+
+    before(function(callback) {
+        User.remove({
+            $or: [ {
+                username: 'test'
+            }, {
+                username: 'test2'
+            }]
+        }, function(err) {
+            if (err) throw err;
+
+            var testUser = new User({
+                handle: 'test',                
+                username: 'test'
+            });
+
+            testUser.save(function(err) {
+                if (err) throw err;
+
+                var testUser2 = new User({
+                    handle: 'test2',                    
+                    username: 'test2'
+                });
+
+                testUser2.save(function(err) {
+                    if (err) throw err;
+
+                    testComment = new Comment({
+                        author: testUser,
+                        content: 'content',
+                        lastUpdatedDate: (new Date()).getTime(),
+                        numOfDislikes: 0,
+                        numOfLikes: 0,
+                        postedDate: (new Date()).getTime()
+                    });					
+					User.findOne({JWT: tests_config.JWT}, function (err, user) {						
+						myTestComment = new Comment({
+							author: user,
+							content: 'mycontent',
+							lastUpdatedDate: (new Date()).getTime(),
+							numOfDislikes: 0,
+							numOfLikes: 0,
+							postedDate: (new Date()).getTime()
+						});
+						testBlog = new Blog({
+							author: testUser,
+							title: 'Test Title',
+							content: 'Test content',
+							isPublished: false,
+							createdDate: (new Date()).getTime(),
+							lastUpdatedDate: (new Date()).getTime(),
+							slug: 'test-title',
+							comments: [
+								testComment,
+								myTestComment
+								]
+							});
+						Blog.find({ }).remove().exec();
+						testBlog.save(callback);
+					});					
+
+                    
+                });
+            });
+        });
+    });
+	
+	it('should return 400 response while input a invalid blogId', function (done) {
+         request(app)
+		     .post('/api/blogs/5ee24f68c105d997e/comments/551f5066ee24f68c105d997d/dislike')			          
+             .set('Accept', 'application/json')
+             .set('Authorization', 'JWT ' + tests_config.JWT)
+             .expect('Content-Type', /json/)
+             .expect(400)
+             .end(function (err) {
+                 if (err) {
+                     throw err;
+                 }
+                 done();
+             });
+     });
+	 it('should return 400 response while input a invalid commentId', function (done) {
+         request(app)
+		     .post('/api/blogs/551f5066ee24f68c105d997e/comments/551f5066ee24f68c105d997d/dislike')			          
+             .set('Accept', 'application/json')
+             .set('Authorization', 'JWT ' + tests_config.JWT)
+             .expect('Content-Type', /json/)
+             .expect(400)
+             .end(function (err) {
+                 if (err) {
+                     throw err;
+                 }
+                 done();
+             });
+     });
+	it('should return 403 response while dislike a comment submit by user himself', function (done) {
+         request(app)
+		     .post('/api/blogs/'+testBlog._id+'/comments/'+myTestComment._id+'/dislike')			          
+             .set('Accept', 'application/json')
+             .set('Authorization', 'JWT ' + tests_config.JWT)
+             .expect('Content-Type', /json/)
+             .expect(403)
+             .end(function (err) {
+                 if (err) {
+                     throw err;
+                 }
+                 done();
+             });
+     });
+	 it('should return 401 when no authorization is given', function(callback) {
+         request(app)
+             .post('/api/blogs/' + testBlog._id + '/comments/' + testComment._id + '/dislike')
+             .expect(401)
+             .end(function(err, res) {
+                 if (err) {
+                     throw err;
+                 }
+
+                 callback();
+             });
+     });
+     it('should return 200 response while dislike a comment successfully', function (done) {
+         request(app)
+		     .post('/api/blogs/'+testBlog._id+'/comments/'+testComment._id+'/dislike')			          
+             .set('Accept', 'application/json')
+             .set('Authorization', 'JWT ' + tests_config.JWT)
+             .expect('Content-Type', /json/)
+             .expect(200)
+             .end(function (err) {
+                 if (err) {
+                     throw err;
+                 }
+                 done();
+             });
+     });
+	 it('should return 403 response while dislike a comment more than once', function (done) {
+         request(app)
+		     .post('/api/blogs/'+testBlog._id+'/comments/'+testComment._id+'/dislike')			          
+             .set('Accept', 'application/json')
+             .set('Authorization', 'JWT ' + tests_config.JWT)
+             .expect('Content-Type', /json/)
+             .expect(403)
+             .end(function (err) {
+                 if (err) {
+                     throw err;
+                 }
+                 done();
+             });
+     });
+	 
+ });
+

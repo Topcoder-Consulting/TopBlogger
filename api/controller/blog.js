@@ -133,3 +133,107 @@ exports.likeBlogComment = function(req, res, next) {
 
     });
 };
+
+
+/**
+ * This method will get blog by Id.
+ *
+ * @author fxish
+ *
+ * @api USE /blogs/:blog_id/
+ * @param {Object} req
+ * @param {Object} res
+ */
+exports.getBlogService = function (req, res, next) {
+    var blog_id = req.params.blog_id;
+    Blog.findById(blog_id, function (err, blog) {
+        if (err){
+            res.status(400).json(err);
+			return;
+		}			
+        req.blog = blog;
+		next();
+    });
+};
+
+/**
+ * This method will get comment by Id.
+ *
+ * @author fxish
+ *
+ * @api USE /blogs/:blog_id/comments/:comment_id
+ * @param {Object} req
+ * @param {Object} res
+ * @param   {Function} next
+ */
+exports.getCommentService = function (req, res, next) {
+    var comment_id = req.params.comment_id;	
+	if (req.blog){
+		var comments = req.blog.comments;		
+		for (var i=0;i<comments.length;++i){		
+			if (comments[i]._id.equals(comment_id)){			
+				req.comment = comments[i];
+				next();	
+				return;
+			}
+		}	
+		res.status(400).json({
+					error: 'The requested resource doesn\'t exists'
+				});
+	}else{
+		res.status(400).json({
+					error: 'The requested resource doesn\'t exists'
+				});
+	}
+};
+
+
+/**
+ * This method will make a comment as disliked by current user.
+ * The author of comment cannot mark the his/her comment as disliked.
+ * The user can dislike a comment at most once.
+ *
+ * @author fxish
+ *
+ * @api POST /blogs/:blog_id/comments/:comment_id/dislike
+ * @param {Object} req
+ * @param {Object} res
+ */
+exports.dislikeComment = function (req, res) {
+    var dislikeUsers = req.comment.dislikeUsers;
+	var user = req.user;
+	if (dislikeUsers===null||user===null){
+		res.status(400).json({
+            error: 'The requested resource doesn\'t exists'
+        });
+		return;
+	}
+	if (user._id.equals(req.comment.author)){
+		res.status(403).json({
+            error: 'The user is not allowed to perform the update on the resource.'
+        });
+		return;
+	}
+	for (var i=0;i<dislikeUsers.length;++i){
+		if (user._id.equals(dislikeUsers[i])){
+			res.status(403).json({
+                error: 'The user is not allowed to perform the update on the resource.'
+            });
+			return;
+			}}	
+	dislikeUsers.push(user._id);
+	req.comment.numOfDislikes=dislikeUsers.length;
+	var query = { _id:req.params.blog_id};
+	Blog.update(query,{comments:req.blog.comments},{},function (err, numberAffected, raw){
+		if (err){
+			res.status(400).json({
+				error: 'The input is not valid'
+			});
+			return;
+		}
+	});
+    res.json({
+                message: "The blog is marked as disliked by current user."
+            });	
+};
+

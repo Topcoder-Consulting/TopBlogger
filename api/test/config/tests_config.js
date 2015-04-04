@@ -12,5 +12,5 @@
 module.exports = {
     // Some test require valid JWT.
     // Replace this with valid JWT otherwise some tests will fail.
-    JWT: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Imtpa28iLCJoYW5kbGUiOiJraXJpNGEiLCJpYXQiOjE0Mjc5NTA0MDR9.ncvNbGjyZMWzqvhD3fBjcjyv0Uu9QMoe12KodBW16T0'
+    JWT: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImZ4aXNoIiwiaGFuZGxlIjoiZnhpc2giLCJpYXQiOjE0MjgwNTk0OTJ9.HT6aVKYZIWGdrux3wGmGFzeapgM3-1lRdN8Q8asv41o'
 };

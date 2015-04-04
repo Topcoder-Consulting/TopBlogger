@@ -91,4 +91,7 @@ router.route('/blogs/:blog_id')
 router.route('/blogs/:blog_id/comments')
     .post(blogController.addComments);
 
+router.route('/blogs/:blog_id/comments/:commentId')
+    .delete(blogController.deleteComments);
+
 module.exports = router;

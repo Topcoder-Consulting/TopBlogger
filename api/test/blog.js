@@ -4,12 +4,13 @@ var app = require('../app');
 var Blog = require('../models/Blog');
 var User = require('../models/User');
 var assert = require('assert');
+var Comment = require('../models/Comment');
 
 describe('Getting Blog Api test', function () {
 
     var user,Blog1;
     before(function(done) {
-        
+       
          user = new User({
              handle: 'jeffdonthemic'
         });
@@ -53,7 +54,7 @@ describe('Getting Blog Api test', function () {
         
         var isValidOrg = function(res) {
             var textCommented = res.body.comments[0].content;
-            assert.equal(textCommented,'sgsfsgge')
+            assert.equal(textCommented,'sggge')
         };
         request(app)
             .post('/api/blogs/' + Blog1._id + '/comments')
@@ -65,6 +66,66 @@ describe('Getting Blog Api test', function () {
          
             
     });
+});
 
+    /*
+        Testing function for deleting the comments
+    */
+
+    describe('Check for deleting the comments' , function() {
+        var user, Blog2;
+        before(function(done) {
+            user = new User({
+                handle: 'goyarpit123'
+            });
+            
+             //user.save(function(){})
+
+            var comment = new Comment({
+            author: user,
+            content: 'Testing deleting the comment',
+            lastUpdateedDate: (new Date).getTime(),
+            postedDate: ( new Date).getTime()
+             });
+
+            Blog2 = new Blog({
+            author: user,
+            title: 'Blog Title for testing deleteing comments',
+            content: 'This is a sample blog content for test',
+            isPublished: false,
+            comments:[comment],
+            createdDate: (new Date).getTime(),
+            lastUpdatedDate: (new Date).getTime(),
+
+            slug: 'slug3'
+           });
+           Blog2.save(function(err,result) {
+                done();
+                
+        });
+    });
+        
+        it('Testing for comment id does not exist', function(done){
+           
+                request(app)
+                .delete('/api/blogs/' + Blog2._id +'/comments/' + Blog2._id)
+                .expect(200)
+                .expect({error :'Comment does not exist'})
+                .end(done)
+        })
+
+        it('testing for  the comment is deleted',function(done){
+              var isValidOrg = function(res) {
+                assert.equal(res.body.comments.length,0)
+              };
+              request(app)
+              .set(request.user)
+              .delete('/api/blogs/' + Blog2._id +'/comments/' + Blog2.comments[0]._id)
+              .expect(200)
+              .expect(isValidOrg)
+              .end(done)
+
+
+        })
 
 });

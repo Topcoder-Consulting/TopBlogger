@@ -18,7 +18,6 @@ var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
 var User = require('../models/User');
 
-
  describe('Getting Blog test', function () {
      it('should return 200 response while accessing api', function (done) {
          request(app)
@@ -67,12 +66,12 @@ var User = require('../models/User');
  });
 
 describe('Liking blog comment', function() {
-    var testUser, testComment, testBlog;
+    var testUser, testUser2, testComment, testBlog;
 
     before(function(callback) {
         User.remove({
             $or: [ {
-                username: 'test'
+                username: 'kiko'
             }, {
                 username: 'test2'
             }]
@@ -80,17 +79,17 @@ describe('Liking blog comment', function() {
             if (err) throw err;
 
             var testUser = new User({
-                handle: 'test',
+                handle: 'kiri4a',
                 JWT: tests_config.JWT,
-                username: 'test'
+                username: 'kiko'
             });
 
             testUser.save(function(err) {
                 if (err) throw err;
 
-                var testUser2 = new User({
+                testUser2 = new User({
                     handle: 'test2',
-                    JWT: tests_config.JWT,
+                    JWT: tests_config.JWT2,
                     username: 'test2'
                 });
 
@@ -128,7 +127,7 @@ describe('Liking blog comment', function() {
     it('should return 200 when liking someone else\'s comment', function(callback) {
         request(app)
             .post('/api/blogs/' + testBlog._id + '/comments/' + testComment._id + '/like')
-            .set('Authorization', 'JWT '+ tests_config.JWT)
+            .set('Authorization', 'JWT '+ tests_config.JWT2)
             .expect(200)
             .end(function(err, res) {
                 if (err) {

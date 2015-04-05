@@ -94,4 +94,7 @@ router.route('/blogs/:blog_id')
 /* API endpoint which publish a unpublished blog. */
 router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 
+/* API endpoint which marks a blog as viewed by current user. */
+router.post('/blogs/:blog_id/view', AuthChecker, blogController.markBlogAsViewed);
+
 module.exports = router;

@@ -94,4 +94,7 @@ router.route('/blogs/:blog_id')
 /* API endpoint which publish a unpublished blog. */
 router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 
+/* API endpoint which up-votes a blog by current user. */
+router.post('/blogs/:blog_id/upvote', AuthChecker, blogController.upVoteBlog);
+
 module.exports = router;

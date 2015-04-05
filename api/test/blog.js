@@ -17,7 +17,7 @@ var assert = require('assert');
 var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
 var User = require('../models/User');
-
+var UserVoteBlog = require('../models/UserVoteBlog');
 
  describe('Getting Blog test', function () {
      it('should return 200 response while accessing api', function (done) {
@@ -188,4 +188,115 @@ describe('Liking blog comment', function() {
                  callback();
              });
      });
+});
+
+
+
+describe('Up-vote Blog test', function () {
+    var testUser, testBlog1, testBlog2;
+
+    before(function(callback) {
+        User.remove({
+            $or: [ {
+                username: 'test'
+            }, {
+                username: 'test2'
+            }]
+        }, function(err) {
+            if (err) throw err;
+
+            testUser = new User({
+                handle: 'test',
+                JWT: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJoYW5kbGUiOiJ0ZXN0IiwiaWF0IjoxNDI3OTUwNDA0fQ.sJ2NpTDae2t6QaXLxNT46Ew7AV0wTuXxFdjQUCWbOj4",
+                username: 'test'
+            });
+
+            testUser.save(function(err) {
+                if (err) throw err;
+
+                var testUser2 = new User({
+                    handle: 'test2',
+                    JWT: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QyIiwiaGFuZGxlIjoidGVzdDIiLCJpYXQiOjE0Mjc5NTA0MDR9.Ak5tIltBozc5R5yCsMR_sXHx9gDbTv8YemID-FKAghw",
+                    username: 'test2'
+                });
+
+                testUser2.save(function(err) {
+                    if (err) throw err;
+
+                    testBlog1 = new Blog({
+                        author: testUser,
+                        title: 'Test Title 1',
+                        content: 'Test content 1',
+                        isPublished: false,
+                        createdDate: (new Date()).getTime(),
+                        lastUpdatedDate: (new Date()).getTime(),
+                        slug: 'test-title-1',
+                        comments: []
+                    });
+
+                    testBlog1.save(function(err) {
+                        if(err) throw err;
+
+                        testBlog2 = new Blog({
+                            author: testUser2,
+                            title: 'Test Title 2',
+                            content: 'Test content 2',
+                            isPublished: false,
+                            createdDate: (new Date()).getTime(),
+                            lastUpdatedDate: (new Date()).getTime(),
+                            slug: 'test-title-2',
+                            comments: []
+                        });
+
+                        testBlog2.save(callback);
+                    });
+
+                    
+                });
+            });
+        });
+    });
+
+    it('should return 401 response when no authentication is given', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog2._id + '/upvote')
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(401, done);
+    });
+
+    it('should return 404 response for not existing blog_id', function (done) {
+        request(app)
+            .post('/api/blogs/999/upvote')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(404)
+            .expect(function (res) {
+                chaiAssert.property(res.body, 'message');
+                chaiAssert.include(res.body.message, 'Cast to ObjectId failed for value');
+            })
+            .end(done);
+    });
+
+    it('should return 200 response for up-voting blog', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog2._id + '/upvote')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(done);
+    });
+
+    it('should return 403 response for up-voting blog by the author of blog', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog1._id +'/upvote')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(403)
+            .end(done);
+    });
+
 });

@@ -51,7 +51,7 @@ var blogSchema = new mongoose.Schema({
         }
     },
     tags: {
-        type: [Tag],
+        type: [Tag.schema],
         meta: {
             _id: {
                 type: Number,

@@ -37,6 +37,7 @@ var AuthChecker = function (req, res, next) {
                 var token = credentials;
                 var decoded;
                 try {
+                    console.log(token);
                     decoded = jwt.verify(token, config.JWT_secret);
                     User.findOne({
                         username: decoded.username
@@ -87,6 +88,9 @@ router.get('/secret', AuthChecker, function (req, res) {
 
 /* API endpoint to like a comment */
 router.post('/blogs/:blogId/comments/:commentId/like', AuthChecker, blogController.likeBlogComment);
+
+/* API endpoint to dislike a comment*/
+router.post('/blogs/:blogId/comments/:commentId/dislike', AuthChecker, blogController.dislikeBlogComment);
 
 /* API endpoint which gets the blog id */
 router.route('/blogs/:blog_id')

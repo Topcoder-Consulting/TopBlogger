@@ -106,8 +106,11 @@ router.post('/blogs/:blog_id/upvote', AuthChecker, blogController.upVoteBlog);
 /* API endpoint which down-vote a blog by current user. */
 router.post('/blogs/:blog_id/votes/downvote', AuthChecker, blogController.downVoteBlog);
 
-router.route('/blogs/:blog_id')
-  .delete(blogController.deleteBlog);
+router.route('/blogs/:blog_id').delete(blogController.deleteBlog);
+
+router.route('/blogs/:blog_id/comments').post(blogController.addComments);
+
+router.route('/blogs/:blog_id/comments/:commentId').delete(blogController.deleteComments);
 
 /*API get blogs by filters*/ 
 router.get('/blogs',AuthChecker,function(req,res){

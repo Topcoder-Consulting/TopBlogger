@@ -531,85 +531,202 @@ describe('Down-vote Blog test', function () {
 
 describe('Deleting Blog test using POST /blogs/{id}', function () {
 
-    var sampleUser1, sampleUser2, sampleBlog1;
-    before(function(done) {
-        sampleUser1 = new User({
-          handle: 'a',
-          JWT: tests_config.JWT
-        });
-        sampleUser1.save();
-        sampleUser2 = new User({
-            handle: 'b',
-            JWT: tests_config.JWT2
-        })
-        sampleUser2.save();
-
-        sampleBlog1 = new Blog({
-          author: sampleUser1,
-          title: 'Blog Title for test',
-          content: 'This is a sample blog content for test',
-          isPublished: false,
-          createdDate: (new Date).getTime(),
-          lastUpdatedDate: (new Date).getTime(),
-          slug: 'slug1'
-        });
-        sampleBlog1.save(function() {
-            done();
-        });
+  var sampleUser1, sampleUser2, sampleBlog1;
+  before(function(done) {
+    sampleUser1 = new User({
+      handle: 'a',
+      JWT: tests_config.JWT
+    });
+    sampleUser1.save();
+    sampleUser2 = new User({
+      handle: 'b',
+      JWT: tests_config.JWT2
     })
+    sampleUser2.save();
 
-    it('should return 403 when user othen than author tries to delete a post', function(done) {
-        request(app)
-        .delete('/api/blogs/' + sampleBlog1._id)
-        .set('Authorization', 'JWT ' + tests_config.JWT2)
-        .expect('Content-Type', /json/)
-        .expect(403)
-        .end(function(err, res) {
-            if (err) {
-                throw err;
-            }
-            done();
-        });
+    sampleBlog1 = new Blog({
+      author: sampleUser1,
+      title: 'Blog Title for test',
+      content: 'This is a sample blog content for test',
+      isPublished: false,
+      createdDate: (new Date).getTime(),
+      lastUpdatedDate: (new Date).getTime(),
+      slug: 'slug1'
+    });
+    sampleBlog1.save(function() {
+      done();
+    });
+  })
+
+  it('should return 403 when user othen than author tries to delete a post', function(done) {
+    request(app)
+      .delete('/api/blogs/' + sampleBlog1._id)
+      .set('Authorization', 'JWT ' + tests_config.JWT2)
+      .expect('Content-Type', /json/)
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
+  it('should return 401 when authorization is not provided', function(done) {
+    request(app)
+      .delete('/api/blogs/' + sampleBlog1._id)
+      .expect('Content-Type', /json/)
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
+  it('should return 200 response while deleting a blog', function (done) {
+    request(app)
+      .delete('/api/blogs/' + sampleBlog1._id)
+      .set('Authorization', 'JWT ' + tests_config.JWT)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+
+  it('should return 400 response when trying to delete a non existent blog post', function (done) {
+    request(app)
+      .delete('/api/blogs/' + sampleBlog1._id)
+      .set('Authorization', 'JWT ' + tests_config.JWT)
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      });
+  });
+});
+
+describe('Getting Blog Api test', function () {
+
+  var user,Blog1;
+  before(function(done) {
+
+    user = new User({
+      handle: 'jeffdonthemic'
     });
 
-    it('should return 401 when authorization is not provided', function(done) {
-        request(app)
-        .delete('/api/blogs/' + sampleBlog1._id)
-        .expect('Content-Type', /json/)
-        .expect(401)
-        .end(function(err, res) {
-            if (err) {
-                throw err;
-            }
-            done();
-        });
+    Blog1 = new Blog({
+      author: user,
+      title: 'Blog Title for test',
+      content: 'This is a sample blog content for test',
+      isPublished: false,
+      createdDate: (new Date).getTime(),
+      lastUpdatedDate: (new Date).getTime(),
+      slug: 'slug1'
+    });
+    Blog1.save(function() {
+      done();
+    });
+  });
+
+  it('should return 200 response while accessing api', function (done) {
+    request(app)
+      .get('/api/blogs/4280209828')
+      .set('Accept', 'application/json')
+      .set('Authorization','JWT ' + tests_config.JWT)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function(err,res) {
+        if (err) {
+          throw err;
+        }
+        done();
+      })
+  });
+
+  /*
+   Check whether the comment has been added or not'
+   */
+
+  it('Check function for adding comments', function (done) {
+
+    var isValidOrg = function(res) {
+      var textCommented = res.body.comments[0].content;
+      assert.equal(textCommented,'sggge')
+    };
+    request(app)
+      .post('/api/blogs/' + Blog1._id + '/comments')
+      .send({"contentText":"sggge"})
+      .expect(200)
+      .expect(isValidOrg)
+      .end(done)
+  });
+});
+
+/*
+ Testing function for deleting the comments
+ */
+
+describe('Check for deleting the comments' , function() {
+  var user, Blog2;
+  before(function(done) {
+    user = new User({
+      handle: 'goyarpit123'
     });
 
-    it('should return 200 response while deleting a blog', function (done) {
-        request(app)
-        .delete('/api/blogs/' + sampleBlog1._id)
-        .set('Authorization', 'JWT ' + tests_config.JWT)
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function(err, res) {
-            if (err) {
-                throw err;
-            }
-            done();
-        });
+    //user.save(function(){})
+
+    var comment = new Comment({
+      author: user,
+      content: 'Testing deleting the comment',
+      lastUpdateedDate: (new Date).getTime(),
+      postedDate: ( new Date).getTime()
     });
 
-    it('should return 400 response when trying to delete a non existent blog post', function (done) {
-        request(app)
-        .delete('/api/blogs/' + sampleBlog1._id)
-        .set('Authorization', 'JWT ' + tests_config.JWT)
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end(function(err, res) {
-            if (err) {
-                throw err;
-            }
-            done();
-        });
+    Blog2 = new Blog({
+      author: user,
+      title: 'Blog Title for testing deleteing comments',
+      content: 'This is a sample blog content for test',
+      isPublished: false,
+      comments:[comment],
+      createdDate: (new Date).getTime(),
+      lastUpdatedDate: (new Date).getTime(),
+
+      slug: 'slug3'
     });
+    Blog2.save(function(err,result) {
+      done();
+
+    });
+  });
+
+  it('Testing for comment id does not exist', function(done){
+
+    request(app)
+      .delete('/api/blogs/' + Blog2._id +'/comments/' + Blog2._id)
+      .expect(200)
+      .expect({error :'Comment does not exist'})
+      .end(done)
+  })
+
+  it('testing for  the comment is deleted',function(done){
+    var isValidOrg = function(res) {
+      assert.equal(res.body.comments.length,0)
+    };
+    request(app)
+      .set(request.user)
+      .delete('/api/blogs/' + Blog2._id +'/comments/' + Blog2.comments[0]._id)
+      .expect(200)
+      .expect(isValidOrg)
+      .end(done)
+  })
+
 });

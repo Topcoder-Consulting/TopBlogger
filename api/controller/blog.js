@@ -11,6 +11,7 @@
 var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
 var UserViewBlog = require('../models/UserViewBlog')
+var UserVoteBlog = require('../models/UserVoteBlog');
 /**
  * This method will get blog by Id.
  *
@@ -156,7 +157,7 @@ exports.markBlogAsViewed = function (req, res) {
                     if(userViewBlog) {
                         res.status(403).json({
                             message: 'The user is not allowed to perform the update on the resource'
-                            });
+                        });
                     } else {
                         var newUserViewBlog = new UserViewBlog({
                             user: user._id,
@@ -171,7 +172,62 @@ exports.markBlogAsViewed = function (req, res) {
                             }
                         })
                     }
-                });                
+                });
+            } else {
+                // The user is not allowed to perform the update on the resource.
+                res.status(403).json({
+                    message: 'The user is not allowed to perform the update on the resource'
+                });
+            }
+        }
+    });
+};
+
+/**
+ * This method will up-vote a blog by current user.
+ * A blog can be up-voted by the same user for at most once.
+ * The author of blog cannot vote for the his/her blog.
+ *
+ * @api POST /blogs/{id}/upvote
+ * @param {Object} req
+ * @param {Object} res
+ */
+exports.upVoteBlog = function (req, res) {
+    var blog_id = req.params.blog_id;
+    var user = req.user;
+
+    Blog.findById(blog_id, function (err, blog) {
+        if (err) {
+            res.status(404).json(err);
+        } else {
+            if (!user._id.equals(blog.author)) {
+                UserVoteBlog.findOne({user:user._id, blog:blog_id}, function(err, userVoteBlog) {
+                    if(userVoteBlog) {
+                        userVoteBlog.upordown = 1;
+                        userVoteBlog.timeStamp = (new Date).getTime();
+                        userVoteBlog.save(function(err) {
+                            if(err) {
+                                res.status(500).json(err);
+                            } else {
+                                res.json(userVoteBlog);
+                            }
+                        });
+                    } else {
+                        var newUserVoteBlog = new UserVoteBlog({
+                            user: user._id,
+                            blog: blog_id,
+                            upordown: 1,
+                            timeStamp: (new Date).getTime()
+                        });
+                        newUserVoteBlog.save(function(err) {
+                            if (err) {
+                                res.status(500).json(err);
+                            } else {
+                                res.json(newUserVoteBlog);
+                            }
+                        })
+                    }
+                });
             } else {
                 // The user is not allowed to perform the update on the resource.
                 res.status(403).json({

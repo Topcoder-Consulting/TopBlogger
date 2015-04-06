@@ -15,7 +15,6 @@ module.exports = {
 
     // Username: kiko
     // Handle: kiri4a
-
     JWT: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Imtpa28iLCJoYW5kbGUiOiJraXJpNGEiLCJpYXQiOjE0Mjc5NTA0MDR9.ncvNbGjyZMWzqvhD3fBjcjyv0Uu9QMoe12KodBW16T0',
 
     // Username: test2

@@ -10,7 +10,7 @@
 
 var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
-
+var UserViewBlog = require('../models/UserViewBlog')
 /**
  * This method will get blog by Id.
  *
@@ -131,5 +131,53 @@ exports.likeBlogComment = function(req, res, next) {
             res.end();
         });
 
+    });
+};
+
+/**
+ * This method will mark a blog as viewed by current user.
+ * A blog can be marked as viewed by the same user for at most once.
+ * The current user should not be the author of blog.
+ *
+ * @api POST /blogs/:blog_id/view
+ * @param {Object} req
+ * @param {Object} res
+ */
+exports.markBlogAsViewed = function (req, res) {
+    var blog_id = req.params.blog_id;
+    var user = req.user;
+
+    Blog.findById(blog_id, function (err, blog) {
+        if (err) {
+            res.status(404).json(err);
+        } else {
+            if (!user._id.equals(blog.author)) {
+                UserViewBlog.findOne({user:user._id, blog:blog_id}, function(err, userViewBlog) {
+                    if(userViewBlog) {
+                        res.status(403).json({
+                            message: 'The user is not allowed to perform the update on the resource'
+                            });
+                    } else {
+                        var newUserViewBlog = new UserViewBlog({
+                            user: user._id,
+                            blog: blog_id,
+                            timeStamp: (new Date).getTime()
+                        });
+                        newUserViewBlog.save(function(err) {
+                            if (err) {
+                                res.status(500).json(err);
+                            } else {
+                                res.json(newUserViewBlog);
+                            }
+                        })
+                    }
+                });                
+            } else {
+                // The user is not allowed to perform the update on the resource.
+                res.status(403).json({
+                    message: 'The user is not allowed to perform the update on the resource'
+                });
+            }
+        }
     });
 };

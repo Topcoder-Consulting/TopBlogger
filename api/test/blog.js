@@ -18,6 +18,7 @@ var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
 var User = require('../models/User');
 
+var UserViewBlog = require('../models/UserViewBlog');
  describe('Getting Blog test', function () {
      it('should return 200 response while accessing api', function (done) {
          request(app)
@@ -187,4 +188,125 @@ describe('Liking blog comment', function() {
                  callback();
              });
      });
+});
+
+describe('Mask Blog As Viewed test', function () {
+    var testUser, testBlog1, testBlog2;
+
+    before(function(callback) {
+        User.remove({
+            $or: [ {
+                username: 'test'
+            }, {
+                username: 'test2'
+            }]
+        }, function(err) {
+            if (err) throw err;
+
+            testUser = new User({
+                handle: 'test',
+                JWT: tests_config.JWT,
+                username: 'test'
+            });
+
+            testUser.save(function(err) {
+                if (err) throw err;
+
+                var testUser2 = new User({
+                    handle: 'test2',
+                    JWT: tests_config.JWT2,
+                    username: 'test2'
+                });
+
+                testUser2.save(function(err) {
+                    if (err) throw err;
+
+                    testBlog1 = new Blog({
+                        author: testUser,
+                        title: 'Test Title 1',
+                        content: 'Test content 1',
+                        isPublished: false,
+                        createdDate: (new Date()).getTime(),
+                        lastUpdatedDate: (new Date()).getTime(),
+                        slug: 'test-title-1',
+                        comments: []
+                    });
+
+                    testBlog1.save(function(err) {
+                        if(err) throw err;
+
+                        testBlog2 = new Blog({
+                            author: testUser2,
+                            title: 'Test Title 2',
+                            content: 'Test content 2',
+                            isPublished: false,
+                            createdDate: (new Date()).getTime(),
+                            lastUpdatedDate: (new Date()).getTime(),
+                            slug: 'test-title-2',
+                            comments: []
+                        });
+
+                        testBlog2.save(callback);
+                    });
+
+                    
+                });
+            });
+        });
+    });
+
+    it('should return 401 response when no authentication is given', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog2._id + '/view')
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(401, done);
+    });
+
+    it('should return 404 response for not existing blog_id', function (done) {
+        request(app)
+            .post('/api/blogs/999/view')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(404)
+            .expect(function (res) {
+                chaiAssert.property(res.body, 'message');
+                chaiAssert.include(res.body.message, 'Cast to ObjectId failed for value');
+            })
+            .end(done);
+    });
+
+    it('should return 200 response for marking blog as viewed', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog2._id + '/view')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(done);
+    });
+
+
+    it('should return 403 response for marking blog as viewed more than once', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog2._id +'/view')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(403)
+            .end(done);
+    });
+
+
+    it('should return 403 response for marking blog as viewed by the author of blog', function (done) {
+        request(app)
+            .post('/api/blogs/' + testBlog1._id +'/view')
+            .set('Accept', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .expect('Content-Type', /json/)
+            .expect(403)
+            .end(done);
+    });
+
 });

@@ -11,5 +11,6 @@
 
 module.exports = {
     JWT_secret: 'JWT secret key',
-    Session_keys: ['TopBlogger secretkey']
+    Session_keys: ['TopBlogger secretkey'],
+    JWTToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImplZmZkb250aGVtaWMiLCJoYW5kbGUiOiJqZWZmZG9udGhlbWljIiwiaWF0IjoxNDI3NzM5OTM0fQ.JAbhdQfKKwiqGexeX1LpU9JEaFeuUQ7rfgqCBpIZ3q4'
 };

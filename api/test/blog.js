@@ -527,5 +527,89 @@ describe('Down-vote Blog test', function () {
       .expect(403)
       .end(done);
   });
+});
 
+describe('Deleting Blog test using POST /blogs/{id}', function () {
+
+    var sampleUser1, sampleUser2, sampleBlog1;
+    before(function(done) {
+        sampleUser1 = new User({
+          handle: 'a',
+          JWT: tests_config.JWT
+        });
+        sampleUser1.save();
+        sampleUser2 = new User({
+            handle: 'b',
+            JWT: tests_config.JWT2
+        })
+        sampleUser2.save();
+
+        sampleBlog1 = new Blog({
+          author: sampleUser1,
+          title: 'Blog Title for test',
+          content: 'This is a sample blog content for test',
+          isPublished: false,
+          createdDate: (new Date).getTime(),
+          lastUpdatedDate: (new Date).getTime(),
+          slug: 'slug1'
+        });
+        sampleBlog1.save(function() {
+            done();
+        });
+    })
+
+    it('should return 403 when user othen than author tries to delete a post', function(done) {
+        request(app)
+        .delete('/api/blogs/' + sampleBlog1._id)
+        .set('Authorization', 'JWT ' + tests_config.JWT2)
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end(function(err, res) {
+            if (err) {
+                throw err;
+            }
+            done();
+        });
+    });
+
+    it('should return 401 when authorization is not provided', function(done) {
+        request(app)
+        .delete('/api/blogs/' + sampleBlog1._id)
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .end(function(err, res) {
+            if (err) {
+                throw err;
+            }
+            done();
+        });
+    });
+
+    it('should return 200 response while deleting a blog', function (done) {
+        request(app)
+        .delete('/api/blogs/' + sampleBlog1._id)
+        .set('Authorization', 'JWT ' + tests_config.JWT)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+            if (err) {
+                throw err;
+            }
+            done();
+        });
+    });
+
+    it('should return 400 response when trying to delete a non existent blog post', function (done) {
+        request(app)
+        .delete('/api/blogs/' + sampleBlog1._id)
+        .set('Authorization', 'JWT ' + tests_config.JWT)
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end(function(err, res) {
+            if (err) {
+                throw err;
+            }
+            done();
+        });
+    });
 });

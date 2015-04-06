@@ -71,6 +71,8 @@ var AuthChecker = function (req, res, next) {
     }
 };
 
+exports.AuthChecker = AuthChecker;
+
 /* API root. */
 router.get('/', function (req, res) {
     res.json({
@@ -103,6 +105,9 @@ router.post('/blogs/:blog_id/upvote', AuthChecker, blogController.upVoteBlog);
 
 /* API endpoint which down-vote a blog by current user. */
 router.post('/blogs/:blog_id/votes/downvote', AuthChecker, blogController.downVoteBlog);
+
+router.route('/blogs/:blog_id')
+  .delete(blogController.deleteBlog);
 
 /*API get blogs by filters*/ 
 router.get('/blogs',AuthChecker,function(req,res){

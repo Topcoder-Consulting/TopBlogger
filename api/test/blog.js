@@ -191,6 +191,172 @@ describe('Liking blog comment', function() {
   });
 });
 
+describe('Disliking blog comment', function() {
+  var testUser, testUser2, testComment, testComment2, testBlog;
+
+  before(function(callback) {
+    User.remove({
+      $or: [ {
+        username: 'kiko'
+      }, {
+        username: 'test2'
+      }]
+    }, function(err) {
+      if (err) throw err;
+
+      testUser = new User({
+        handle: 'kiri4a',
+        JWT: tests_config.JWT,
+        username: 'kiko'
+      });
+
+      testUser.save(function(err) {
+        if (err) throw err;
+
+        testUser2 = new User({
+          handle: 'test2',
+          JWT: tests_config.JWT2,
+          username: 'test2'
+        });
+
+        testUser2.save(function(err) {
+          if (err) throw err;
+
+          testComment = new Comment({
+            author: testUser,
+            content: 'awesome comment',
+            lastUpdatedDate: (new Date()).getTime(),
+            numOfDislikes: 0,
+            numOfLikes: 0,
+            postedDate: (new Date()).getTime()
+          });
+		  
+		  testComment2 = new Comment({
+            author: testUser2,
+            content: 'awesome comment 2',
+            lastUpdatedDate: (new Date()).getTime(),
+            numOfDislikes: 0,
+            numOfLikes: 0,
+            postedDate: (new Date()).getTime()
+          });
+
+          testBlog = new Blog({
+            author: testUser,
+            title: 'Test Title',
+            content: 'Test content',
+            isPublished: false,
+            createdDate: (new Date()).getTime(),
+            lastUpdatedDate: (new Date()).getTime(),
+            slug: 'test-title',
+            comments: [
+              testComment,
+			  testComment2
+            ]
+          });
+
+          testBlog.save(callback);
+        });
+      });
+    });
+  });
+
+  it('should return 200 when disliking someone else\'s comment', function(callback) {
+    request(app)
+      .post('/api/blogs/' + testBlog._id + '/comments/' + testComment._id + '/dislike')
+      .set('Authorization', 'JWT '+ tests_config.JWT2)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+
+        Blog.findById(testBlog._id, function(err, blog) {
+          if (err) {
+            throw err;
+          }
+
+          assert.strictEqual(1, blog.comments[0].numOfDislikes);
+          assert.deepEqual(testUser2._id, blog.comments[0].dislikeUsers[0]);
+
+          callback();
+        });
+      });
+  });
+  
+  it('should return 200 when disliking someone else\'s already liked comment', function(callback) {
+    request(app)
+      .post('/api/blogs/' + testBlog._id + '/comments/' + testComment2._id + '/like')
+      .set('Authorization', 'JWT '+ tests_config.JWT)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+		request(app)
+		  .post('/api/blogs/' + testBlog._id + '/comments/' + testComment2._id + '/dislike')
+		  .set('Authorization', 'JWT '+ tests_config.JWT)
+		  .expect(200)
+		  .end(function(err, res) {
+				Blog.findById(testBlog._id, function(err, blog) {
+				  if (err) {
+					throw err;
+				  }
+
+				  assert.strictEqual(1, blog.comments[1].numOfDislikes);
+				  assert.strictEqual(0, blog.comments[1].numOfLikes);
+				  chaiAssert.isUndefined(blog.comments[1].likeUsers[0]);
+				  assert.deepEqual(testUser._id, blog.comments[1].dislikeUsers[0]);
+
+				  callback();
+				});
+		  });
+		
+      });
+  });
+
+  it('should return 403 when disliking own comment', function(callback) {
+    request(app)
+      .post('/api/blogs/' + testBlog._id + '/comments/' + testComment._id + '/dislike')
+      .set('Authorization', 'JWT ' + tests_config.JWT)
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+
+        callback();
+      });
+  });
+
+  it('should return 403 when disliking comment twice', function(callback) {
+    request(app)
+      .post('/api/blogs/' + testBlog._id + '/comments/' + testComment._id + '/dislike')
+      .set('Authorization', 'JWT ' + tests_config.JWT)
+      .expect(403)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+
+        callback();
+      });
+  });
+
+  it('should return 401 when no authorization is given', function(callback) {
+    request(app)
+      .post('/api/blogs/' + testBlog._id + '/comments/' + testComment._id + '/dislike')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) {
+          throw err;
+        }
+
+        callback();
+      });
+  });
+});
+
+
 describe('Mask Blog As Viewed test', function () {
   var testUser, testBlog1, testBlog2;
 

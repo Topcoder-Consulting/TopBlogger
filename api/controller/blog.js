@@ -137,6 +137,80 @@ exports.likeBlogComment = function(req, res, next) {
     });
 };
 
+exports.dislikeBlogComment = function (req, res, next)  {
+    Blog.findOne({
+        _id: req.params.blogId
+    }, function(err, blog) {
+        if (err) {
+            next(err);
+            return;
+        }
+        else if (!blog) {
+            res.status(400).json({
+                error: 'Blog does not exist.'
+            });
+            return;
+        }
+
+        var i = 0;
+
+        for (iLength = blog.comments.length; i < iLength; ++i)
+        {
+            if (blog.comments[i]._id.equals(req.params.commentId))
+            {
+                break;
+            }
+        }
+
+        if (i === blog.comments.length)
+        {
+            res.status(400).json({
+                error: 'Comment does not exist'
+            });
+            return;
+        }
+
+        var comment = blog.comments[i];
+
+        if (comment.author.equals(req.user._id)) {
+            res.status(403).json({
+                error: 'User is not allowed to dislike own post.'
+            });
+            return;
+        }
+
+        for (var i = 0, iLength = comment.dislikeUsers.length; i < iLength; ++i) {
+            if (req.user._id.equals(comment.dislikeUsers[i])) {
+                res.status(403).json({
+                    error: 'User already disliked this comment.'
+                });
+                return;
+            }
+        }
+
+        comment.numOfDislikes++;
+        comment.dislikeUsers.push(req.user._id);
+
+        /*check is user has already liked the comment. Remove that user entry from if he does*/
+        for (var i = 0, iLength = comment.likeUsers.length; i < iLength; i++) {
+            if (req.user._id.equals(comment.likeUsers[i])) {
+                comment.numOfLikes--;
+                comment.likeUsers.splice(i, 1);
+            }
+        }
+
+        blog.save(function(err) {
+            if (err) {
+                next(err);
+                return;
+            }
+
+            res.end();
+        });
+
+    });
+};
+
 /**
  * This method will mark a blog as viewed by current user.
  * A blog can be marked as viewed by the same user for at most once.

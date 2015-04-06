@@ -37,7 +37,6 @@ var AuthChecker = function (req, res, next) {
                 var token = credentials;
                 var decoded;
                 try {
-                    console.log(token);
                     decoded = jwt.verify(token, config.JWT_secret);
                     User.findOne({
                         username: decoded.username

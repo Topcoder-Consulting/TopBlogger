@@ -98,6 +98,9 @@ router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
 /* API endpoint which marks a blog as viewed by current user. */
 router.post('/blogs/:blog_id/view', AuthChecker, blogController.markBlogAsViewed);
 
+/* API endpoint which up-votes a blog by current user. */
+router.post('/blogs/:blog_id/upvote', AuthChecker, blogController.upVoteBlog);
+
 /*API get blogs by filters*/ 
 router.get('/blogs',AuthChecker,function(req,res){
     blogService.getBlogs(req.query,function(err,blogs){

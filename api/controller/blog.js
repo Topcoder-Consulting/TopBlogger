@@ -12,6 +12,8 @@ var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
 var UserViewBlog = require('../models/UserViewBlog');
 var UserVoteBlog = require('../models/UserVoteBlog');
+var User = require('../models/User');
+var apiRoute = require('../routes/api');
 /**
  * This method will get blog by Id.
  *
@@ -291,4 +293,43 @@ exports.downVoteBlog = function (req, res) {
             }
         }
     });
+};
+
+exports.deleteBlog = function(req, res) {
+    Blog.findById(req.params.blog_id, function(err, blog) {
+        if (err) {
+            res.status(500).json(err);
+            return;
+        }
+
+        if (blog != undefined) {
+            apiRoute.AuthChecker(req, res, function() {
+                if (req.user !== undefined) {
+                    User.findById(blog.author, function(err, authorUser) {
+                        if (err) {
+                            res.status(500).json(err);
+                            return;
+                        }
+                        if (req.user.JWT === authorUser.JWT) {
+                            blog.remove(function(err, result) {
+                                if (err) res.status(500).json(err);
+                                if (!err) {
+                                    res.json("Successfully deleted Blog with title: " + blog.title);
+                                }
+                            })
+                        }
+                        else {
+                            res.status(403).json("The user is not allowed to perform the update on the resource.");
+                        }
+                    });
+                }
+                else {
+                    res.status(401).json("Invalid token");
+                }
+            });
+        }
+        else {
+            res.status(400).json('The input is not valid');
+        }
+    })
 };

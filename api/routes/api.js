@@ -109,6 +109,9 @@ router.post('/blogs/:blog_id/upvote', AuthChecker, blogController.upVoteBlog);
 /* API endpoint which down-vote a blog by current user. */
 router.post('/blogs/:blog_id/votes/downvote', AuthChecker, blogController.downVoteBlog);
 
+/* API endpoint to update a comment*/
+router.put('/blogs/:blog_id/comments/:comment_id', AuthChecker, blogController.updateBlogComment);
+
 router.route('/blogs/:blog_id').delete(blogController.deleteBlog);
 
 router.route('/blogs/:blog_id/comments').post(blogController.addComments);

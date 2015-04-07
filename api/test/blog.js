@@ -357,13 +357,13 @@ describe('Disliking blog comment', function() {
 });
 
 
-describe('Mask Blog As Viewed test', function () {
+describe('Mark Blog As Viewed test', function () {
   var testUser, testBlog1, testBlog2;
 
   before(function(callback) {
     User.remove({
       $or: [ {
-        username: 'test'
+        username: 'kiko'
       }, {
         username: 'test2'
       }]
@@ -371,9 +371,9 @@ describe('Mask Blog As Viewed test', function () {
       if (err) throw err;
 
       testUser = new User({
-        handle: 'test',
+        handle: 'kiri4a',
         JWT: tests_config.JWT,
-        username: 'test'
+        username: 'kiko'
       });
 
       testUser.save(function(err) {
@@ -484,7 +484,7 @@ describe('Up-vote Blog test', function () {
   before(function(callback) {
     User.remove({
       $or: [ {
-        username: 'test'
+        username: 'kiko'
       }, {
         username: 'test2'
       }]
@@ -492,9 +492,9 @@ describe('Up-vote Blog test', function () {
       if (err) throw err;
 
       testUser = new User({
-        handle: 'test',
+        handle: 'kiri4a',
         JWT: tests_config.JWT,
-        username: 'test'
+        username: 'kiko'
       });
 
       testUser.save(function(err) {
@@ -593,7 +593,7 @@ describe('Down-vote Blog test', function () {
   before(function(callback) {
     User.remove({
       $or: [ {
-        username: 'test'
+        username: 'kiko'
       }, {
         username: 'test2'
       }]
@@ -601,9 +601,9 @@ describe('Down-vote Blog test', function () {
       if (err) throw err;
 
       testUser = new User({
-        handle: 'test',
+        handle: 'kiri4a',
         JWT: tests_config.JWT,
-        username: 'test'
+        username: 'kiko'
       });
 
       testUser.save(function(err) {

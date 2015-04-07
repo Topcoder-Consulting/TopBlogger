@@ -67,6 +67,139 @@ describe('Publishing Blog test', function () {
   //2. get unpublished blogs -> publish an existing unpublished blog
 });
 
+describe('Updating a comment', function() {
+	var testUser, testUser2, testComment, testBlog;
+	
+	before (function(callback) {
+		User.remove({
+		  $or: [ {
+			username: 'kiko'
+		  }, {
+			username: 'test2'
+		  }]
+		}, function(err) {
+		  if (err) throw err;
+
+		  var testUser = new User({
+			handle: 'kiri4a',
+			JWT: tests_config.JWT,
+			username: 'kiko'
+		  });
+
+		  testUser.save(function(err) {
+			if (err) throw err;
+
+			testUser2 = new User({
+			  handle: 'test2',
+			  JWT: tests_config.JWT2,
+			  username: 'test2'
+			});
+
+			testUser2.save(function(err) {
+			  if (err) throw err;
+
+			  testComment = new Comment({
+				author: testUser,
+				content: 'content',
+				lastUpdatedDate: (new Date()).getTime(),
+				numOfDislikes: 0,
+				numOfLikes: 0,
+				postedDate: (new Date()).getTime()
+			  });
+
+			  testBlog = new Blog({
+				author: testUser,
+				title: 'Test Title',
+				content: 'Test content',
+				isPublished: false,
+				createdDate: (new Date()).getTime(),
+				lastUpdatedDate: (new Date()).getTime(),
+				slug: 'test-title',
+				comments: [
+				  testComment
+				]
+			  });
+
+			  testBlog.save(callback);
+			});
+		  });
+		});
+
+	});
+	
+	it('should return 200 when user updates his comment', function (callback) {
+		request(app)
+			.put('/api/blogs/' + testBlog._id + '/comments/' + testComment._id)
+			.set('Authorization', 'JWT ' + tests_config.JWT)
+			.send({contentText: 'new content'})
+			.expect(200)
+			.end(function(err, res) {
+				if (err) {
+					throw err;
+				}
+				
+				Blog.findById(testBlog._id, function(err, blog) {
+					var commentToTest;
+					if (err) {
+					throw err;
+					}
+					for (var i = 0, iLength = blog.comments.length; i < iLength; i++) {
+						if (blog.comments[i]._id.equals(testComment._id)) {
+							commentToTest = blog.comments[i];
+							break;
+						}
+					}
+					chaiAssert.strictEqual('new content', commentToTest.content);
+					callback();
+				});
+			}); 
+	});
+	
+	it('should return 403 when editing someone else\'s comment', function(callback) {
+		request(app)
+			.put('/api/blogs/' + testBlog._id + '/comments/' + testComment._id)
+			.set('Authorization', 'JWT ' + tests_config.JWT2)
+			.send({contentText: 'new content 2'})
+			.expect(403)
+			.end(function(err, res) {
+				if (err) {
+				  throw err;
+				}
+
+				callback();
+			});
+	});
+	
+	it('should return 400 when invalid field is passed', function(callback) {
+		request(app)
+			.put('/api/blogs/' + testBlog._id + '/comments/' + testComment._id)
+			.set('Authorization', 'JWT ' + tests_config.JWT)
+			.send({random: 'new content 2'})
+			.expect(400)
+			.end(function(err, res) {
+				if (err) {
+				  throw err;
+				}
+
+				callback();
+			});
+	});
+	
+	it('should return 401 when no authorization is given', function(callback) {
+		request(app)
+			.put('/api/blogs/' + testBlog._id + '/comments/' + testComment._id)
+			.send({contentText: 'new content 2'})
+			.expect(401)
+			.end(function(err, res) {
+				if (err) {
+				  throw err;
+				}
+
+				callback();
+			});
+	});
+});
+
 describe('Liking blog comment', function() {
   var testUser, testUser2, testComment, testBlog;
 

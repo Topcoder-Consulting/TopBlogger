@@ -491,3 +491,55 @@ exports.deleteComments = function(req,res) {
 
     });
 };
+
+exports.updateBlogComment = function(req, res) {
+	if (!req.body.hasOwnProperty('contentText')) {
+		res.status(400).json({
+			error: 'Invalid data'
+		});
+		return
+	}
+	Blog.findById(req.params.blog_id, function (err, blog) {
+		var commentToUpdate, commentFound = false;
+		if (err) {
+			res.end(err);
+			return;
+		} else if (!blog) {
+            res.status(400).json(
+              {error:'Blog does not exist.'
+              });
+            return;
+        }
+		for (var i = 0, iLength = blog.comments.length; i < iLength; i++) {
+			if (blog.comments[i]._id.equals(req.params.comment_id)) {
+				commentToUpdate = blog.comments[i];
+				commentFound = true;
+				break;
+			}
+		}
+		/* Check if the comment exists*/
+		if (!commentFound) {
+			res.status(400).json({
+				error: 'Comment does not exist'
+			});
+			return;
+		}
+		/*Check if the user is the author of the comment*/
+		if (!commentToUpdate.author.equals(req.user._id)) {
+			res.status(403).json({
+				error: "User is not authorized to edit someone else's comment"
+			});
+			return;
+		}
+		/* update the comment*/
+		commentToUpdate.content = req.body.contentText;
+		commentToUpdate.lastUpdatedDate = (new Date()).getTime();
+		blog.save(function (err) {
+			if (err) {
+				res.send(err);
+			} else {
+				res.json(blog);
+			}
+		});
+	});
+};

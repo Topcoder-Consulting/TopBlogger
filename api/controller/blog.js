@@ -525,7 +525,7 @@ exports.updateComment = function(req,res) {
                 }
                 else {
                      res.status(403).json({
-                        error: 'User is not allowed to delete the comment'
+                        error: 'User is not allowed to update the comment'
                     });
                 }
             }   

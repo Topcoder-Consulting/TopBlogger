@@ -35,7 +35,7 @@ var blogSchema = new mongoose.Schema({
         required: true
     },
     author: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        type: [User.schema],
         required: true,
         meta: {
             _id: {

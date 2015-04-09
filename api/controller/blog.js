@@ -16,6 +16,7 @@ var UserViewBlog = require('../models/UserViewBlog');
 var UserVoteBlog = require('../models/UserVoteBlog');
 var User = require('../models/User');
 var apiRoute = require('../routes/api');
+var service = require('../services/blog');
 var _ = require('lodash');
 
 /**
@@ -395,6 +396,22 @@ exports.downVoteBlog = function (req, res) {
             }
         }
     });
+};
+
+
+/**
+ * Creates a new blog.
+ *
+ * @param {Object} req the expressJS request object
+ * @param {Object} res the expressJS response object
+ * @param {Function} callback the callback function it is given the following parameters
+ *    1) error - execution errors encountered (if any)
+ *    2) blog - the created object
+ */
+exports.createBlog = function(req, res, callback) {
+	service.createBlog(req.body, function(err, blog) {
+		callback(err, blog);
+	});
 };
 
 exports.deleteBlog = function(req, res) {

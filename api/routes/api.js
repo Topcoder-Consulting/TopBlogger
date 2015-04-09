@@ -94,9 +94,10 @@ router.post('/blogs/:blogId/comments/:commentId/like', AuthChecker, blogControll
 /* API endpoint to dislike a comment*/
 router.post('/blogs/:blogId/comments/:commentId/dislike', AuthChecker, blogController.dislikeBlogComment);
 
-/* API endpoint which gets the blog id */
+/* API endpoint which gets, updates the blog id */
 router.route('/blogs/:blog_id')
-    .get(blogController.getBlog);
+    .get(blogController.getBlog)
+    .put(AuthChecker, blogController.updateBlog);
 
 /* API endpoint which publish a unpublished blog. */
 router.post('/blogs/:blog_id/publish', AuthChecker, blogController.publishBlog);
@@ -118,15 +119,15 @@ router.delete('/blogs/:blog_id/comments/:commentId',AuthChecker,blogController.d
 
 router.put('/blogs/:blog_id/comments/:commentId',AuthChecker,blogController.updateComment);
 
-/*API get blogs by filters*/ 
+/*API get blogs by filters*/
 router.get('/blogs',AuthChecker,function(req,res){
     blogService.getBlogs(req.query,function(err,blogs){
-        if(err){ 
+        if(err){
             res.status(err.code).json({
-                'message' : err.message 
+                'message' : err.message
             });
         }
-        else 
+        else
             res.json(blogs);
     });
 });

@@ -1,12 +1,14 @@
 /*
  * Copyright (C) 2015 TopCoder Inc., All Rights Reserved.
  */
+
 /**
  * Represents the TopBlogger API publish Blog controller.
  *
  * @version 1.0
  * @author kiri4a and other
  */
+'use strict';
 
 var Blog = require('../models/Blog');
 var Comment = require('../models/Comment');
@@ -14,6 +16,32 @@ var UserViewBlog = require('../models/UserViewBlog');
 var UserVoteBlog = require('../models/UserVoteBlog');
 var User = require('../models/User');
 var apiRoute = require('../routes/api');
+var _ = require('lodash');
+
+/**
+ * Constructor for object representation of Bad Request Error (400)
+ * @param msg - error message
+ */
+function BadRequestError(msg) {
+    this.code = 400;
+    this.name = 'Bad Request';
+    this.message = msg || 'Bad Request';
+}
+BadRequestError.prototype = Object.create(Error.prototype);
+
+/**
+ * Constructor for object representation of Forbidden Error (403)
+ * @param msg - error message
+ */
+function ForbiddenError(msg) {
+    this.code = 403;
+    this.name = 'Forbidden';
+    this.message = msg || 'Forbidden';
+
+}
+ForbiddenError.prototype = Object.create(Error.prototype);
+
+
 /**
  * This method will get blog by Id.
  *
@@ -511,7 +539,7 @@ exports.updateComment = function(req,res) {
         }
         var flag = 0,flag2 =  0;
 
-        for ( i = 0; i < blog.comments.length;i++) {
+        for ( var i = 0; i < blog.comments.length;i++) {
             if ( blog.comments[i]._id.equals(req.params.commentId)) {
                     flag2 = 1;
                 if ( blog.comments[i].author.equals(req.user._id)) {
@@ -548,4 +576,124 @@ exports.updateComment = function(req,res) {
 
 
     });
+};
+
+/**
+ * Constructor for object representation of Not Found Error (404)
+ * @param msg - error message
+ */
+function NotFoundError(msg) {
+    this.code = 404;
+    this.name = 'Not Found';
+    this.message = msg || 'Not Found';
+}
+NotFoundError.prototype = Object.create(Error.prototype);
+
+/**
+ * This method updates a blog.
+ * It can only be done by the author of blog.
+ *
+ * @api PUT /blogs/:blog_id
+ * @param {Object} req
+ * @param {Object} res
+ */
+exports.updateBlog = function (req, res) {
+    var legalFields = {
+        // Collection of legal fields to be updated by this api.
+        // Values are validation functions for the respective field
+        title: _.isString,
+        slug: _.isString,
+        tags: _.isArray,
+        content: _.isString
+    },
+        // Flag to denote illegal input.
+        // undefined - valid input
+        // otherwise - invalid input
+        illegal;
+    if (!req.body || _.isEmpty(req.body)) {
+        return res.status(400).json({
+                    error: 'No blog data provided.'
+                });
+    }
+    // Check for illegal fields
+    illegal = _.find(req.body, function (value, field) {
+        return !legalFields[field] || !legalFields[field](value);
+    });
+    if (!_.isUndefined(illegal)) {
+        return res.status(400).json({
+            error: 'Illegal field detected in submitted data.'
+        });
+    }
+    if (!req.params.blog_id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({
+            error: 'Illegal format for parameter Blog ID.'
+        });
+    }
+    return Blog.findByIdAsync(req.params.blog_id
+    ).then(
+        function (data) {
+            // Check if blog entry exists.
+            if (_.isEmpty(data)) {
+                throw new NotFoundError(
+                    "The requested resource does not exist."
+                );
+            }
+            // Check user is blog author.
+            if (!req.user._id.equals(data.author)) {
+                throw new ForbiddenError(
+                    "The user is not allowed to perform the update on the resource."
+                );
+            }
+            // If slug is updated, check uniqueness for current user.
+            if (_.has(req.body, 'slug')) {
+                return Blog.findOne({
+                    author: data.author,
+                    slug: req.body.slug
+                }).execAsync(
+                ).then(
+                    function (doc) {
+                        // If slug won't be unique anymore, raise error.
+                        if (doc && !doc._id.equals(data._id)) {
+                            throw new BadRequestError(
+                                "The changed slug will not be unique per user anymore."
+                            );
+                        }
+                        // Otherwise return blog to be updated.
+                        return data;
+                    }
+                );
+            }
+            // Return blog to be updated.
+            return data;
+        }
+    ).then(
+        // Update blog.
+        function (data) {
+            req.body.lastUpdatedDate = Date.now();
+            return data.update(req.body).execAsync().then(function () {
+                return Blog.findOne({_id: data._id}).execAsync();
+            });
+        }
+    ).then(
+        // Handle regular response.
+        function (data) {
+            // Return updated blog.
+            return res.json(data);
+        }
+    ).catch (
+        BadRequestError,
+        ForbiddenError,
+        NotFoundError,
+        // Handle expected errors.
+        function (e) {
+            // Return error response.
+            return res.status(e.code).json({error: e.message});
+        }
+    ).catch(
+        // Handle unexpected errors.
+        function (e) {
+            // Return error response.
+            return res.status(500).json(e);
+        }
+    );
 };

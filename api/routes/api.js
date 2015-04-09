@@ -27,12 +27,13 @@ var blogService = require('../services/blog');
  * @param   {Function} next
  */
 var AuthChecker = function (req, res, next) {
+    
     if (req.headers && req.headers.authorization) {
+        
         var parts = req.headers.authorization.split(' ');
         if (parts.length == 2) {
             var scheme = parts[0];
             var credentials = parts[1];
-
             if (/^JWT/i.test(scheme)) {
                 var token = credentials;
                 var decoded;
@@ -111,9 +112,11 @@ router.post('/blogs/:blog_id/votes/downvote', AuthChecker, blogController.downVo
 
 router.route('/blogs/:blog_id').delete(blogController.deleteBlog);
 
-router.route('/blogs/:blog_id/comments').post(blogController.addComments);
+router.post('/blogs/:blog_id/comments',AuthChecker,blogController.addComments);
 
-router.route('/blogs/:blog_id/comments/:commentId').delete(blogController.deleteComments);
+router.delete('/blogs/:blog_id/comments/:commentId',AuthChecker,blogController.deleteComments);
+
+router.put('/blogs/:blog_id/comments/:commentId',AuthChecker,blogController.updateComment);
 
 /*API get blogs by filters*/ 
 router.get('/blogs',AuthChecker,function(req,res){

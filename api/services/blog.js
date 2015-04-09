@@ -13,7 +13,12 @@ var mongoose = require('mongoose');
 var Blog = require('../models/Blog');
 var User = require('../models/User');
 var Tag = require('../models/Tag');
+var tagService = require('../services/tag');
+
 var _ = require('underscore');
+var Promise = require("bluebird");
+var slugify = require('slugify');
+var __ = require('lodash');
 
 
 /**
@@ -253,6 +258,80 @@ function getBlogs(filter,callback){
     });// end of getUserByHandle
 }
 
+/**
+ * Creates a new blog.
+ * @param {Object} blog to create in json format
+ * @param {Function} callback the callback function it is given the following parameters
+ *    1) error - execution errors encountered (if any)
+ *    2) block - the created blog
+ */
+function createBlog(blog, callback) {
+
+    if (typeof blog.author === 'undefined') {
+        blog.author = {
+            "_id": "",
+            "handle": ""
+        };
+    }
+    if (typeof blog.tags === 'undefined') {
+        blog.tags = [];
+    }
+
+    return Promise.all(
+        __.map(
+            blog.tags,
+            function (tag) {
+                if (typeof tag._id === 'undefined') {
+                    return tagService.createTag(tag.name);
+                } else {
+                    return new Tag({
+                        "_id": tag._id,
+                        "name": tag.name
+                    });
+                }
+            }
+        )
+    )
+    .then(
+        function (tags) {
+            var _blog = new Blog({
+                "title": blog.title,
+                "slug": slugify(blog.title),
+                "publishedDate": blog.publishedDate,
+                "createdDate": blog.createdDate,
+                "lastUpdatedDate": blog.lastUpdatedDate,
+                "content": blog.content,
+                "isPublished": blog.isPublished,
+                "numOfViews": 0,
+                "numOfUpVotes": 0,
+                "numOfDownVotes": 0
+            });
+
+            var author = new User({
+                "_id": blog.author._id,
+                "handle": blog.author.handle
+            });
+            _blog.author = author;
+
+            var _tags = []
+            for (var i = 0; i < tags.length; ++i) {
+                _tags.push(tags[i][0]);
+            }
+            _blog.tags = _tags;
+
+            return _blog.saveAsync();
+        }
+    )
+    .then(function (_blog) {
+        callback(null, _blog);
+    })
+    .error(function (e) {
+        callback(e, null);
+    });
+
+}
+
 module.exports = {
-    getBlogs: getBlogs
+    getBlogs: getBlogs,
+    createBlog: createBlog
 }

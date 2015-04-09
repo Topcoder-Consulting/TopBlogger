@@ -823,6 +823,67 @@ describe('Getting Blog Api test', function () {
 });
 
 /*
+ Tests for creating new blog
+ */
+describe('Create Blog', function() {
+
+    it('should return 201 response for basic new blog creation', function(done) {
+        request(app)
+            .post('/api/blogs')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .send({
+                "title": "title 01",
+                "slug": "slug 01",
+                "publishedDate": 123456,
+                "createdDate": 123456,
+                "lastUpdatedDate": 123456,
+                "content": "content 01",
+                "isPublished": false,
+                "author" : {
+                    "_id": "551ee459b49473f52409f5ce",
+                    "handle" : "user1"
+                },
+                "tags" : [
+                    {
+                        "name": "tag01"
+                    },
+                    {
+                        "name": "tag02"
+                    }
+                    ]
+            })
+            .expect('Content-Type', /json/)
+            .expect(201)
+            .end(function(err,res) {
+            	if (err) {
+            		throw err;
+            	}
+           		done();
+           	})
+    })
+
+    it('should return 400 response for invalid input', function(done) {
+        request(app)
+            .post('/api/blogs')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'JWT ' + tests_config.JWT)
+            .send({
+                "title": "title 01"
+            })
+            .expect('Content-Type', /json/)
+            .expect(400)
+            .end(function(err,res) {
+            	if (err) {
+            		throw err;
+            	}
+           		done();
+           	})
+    })
+
+});
+
+/*
  Testing function for Adding ,Updating and Deleting the comments
  */
 

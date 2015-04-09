@@ -410,6 +410,7 @@ exports.deleteBlog = function(req, res) {
 
 exports.addComments = function(req,res) {
 
+   
     Blog.findById(req.params.blog_id,function(err,blog) {
         if (err) {
             res.send(err);
@@ -419,7 +420,7 @@ exports.addComments = function(req,res) {
         var comment = new Comment({
             author: req.user,
             content: req.body.contentText,
-            lastUpdateedDate: (new Date).getTime(),
+            lastUpdatedDate: (new Date).getTime(),
             postedDate: ( new Date).getTime()
         });
 
@@ -427,6 +428,7 @@ exports.addComments = function(req,res) {
 
         blog.save(function(err,result) {
             if ( err) {
+            
                 res.send(err);
                 return;
             }
@@ -456,7 +458,7 @@ exports.deleteComments = function(req,res) {
         var i = 0;
         var flag = 0;
         var flag2 = 0;
-
+        
         for ( i = 0; i < blog.comments.length; i++) {
             if ( blog.comments[i]._id.equals(req.params.commentId)) {
                 flag2 = 1;
@@ -488,6 +490,62 @@ exports.deleteComments = function(req,res) {
         if ( flag2 == 0) {
             res.json({error :'Comment does not exist'});
         }
+
+    });
+};
+
+exports.updateComment = function(req,res) {
+
+    Blog.findById(req.params.blog_id,function(err,blog) {
+
+        if (err) {
+            res.send(err);
+            return;
+        }
+
+        else if ( !blog) {
+            res.status(400).json(
+              {error:'Blog does not exist.'
+              });
+            return;
+        }
+        var flag = 0,flag2 =  0;
+
+        for ( i = 0; i < blog.comments.length;i++) {
+            if ( blog.comments[i]._id.equals(req.params.commentId)) {
+                    flag2 = 1;
+                if ( blog.comments[i].author.equals(req.user._id)) {
+
+                        blog.comments[i].content = req.body.contentText;
+                        blog.comments[i].lastUpdatedDate = (new Date).getTime();
+                        flag = 1;
+                        break;
+
+
+                }
+                else {
+                     res.status(403).json({
+                        error: 'User is not allowed to update the comment'
+                    });
+                }
+            }   
+
+        }
+
+        if ( flag == 1) {
+            blog.save(function(err){
+                if (err)
+                    res.send(err);
+                else
+                    res.json(blog);
+            });
+        }
+
+        if ( flag2 == 0) {
+            res.json({error :'Comment does not exist'});
+        }
+
+
 
     });
 };

@@ -20,6 +20,7 @@ var User = require('../models/User');
 var UserVoteBlog = require('../models/UserVoteBlog');
 
 var UserViewBlog = require('../models/UserViewBlog');
+
 describe('Getting Blog test', function () {
   it('should return 200 response while accessing api', function (done) {
     request(app)
@@ -818,78 +819,111 @@ describe('Getting Blog Api test', function () {
       })
   });
 
-  /*
-   Check whether the comment has been added or not'
-   */
+  
+});
 
+/*
+ Testing function for Adding ,Updating and Deleting the comments
+ */
+
+describe('Test adding,updating,deleting the comments' , function() {
+  
+  var testUser, testUser2, testComment, testBlog;
+  before(function(done) {
+    User.remove({
+      $or: [ {
+        username: 'kiko'
+      }, {
+        username: 'test2'
+      }]
+    }, function(err) {
+      if (err) throw err;
+
+      var testUser = new User({
+        handle: 'kiri4a',
+        JWT: tests_config.JWT,
+        username: 'kiko'
+      });
+
+      testUser.save(function(err) {
+        if (err) throw err;
+
+        testUser2 = new User({
+          handle: 'test2',
+          JWT: tests_config.JWT2,
+          username: 'test2'
+        });
+
+        testUser2.save(function(err) {
+          if (err) throw err;
+
+          testComment = new Comment({
+            author: testUser,
+            content: 'content',
+            lastUpdatedDate: (new Date()).getTime(),
+            numOfDislikes: 0,
+            numOfLikes: 0,
+            postedDate: (new Date()).getTime()
+          });
+
+          testBlog = new Blog({
+            author: testUser,
+            title: 'Test for adding comment',
+            content: 'Test for adding comment',
+            isPublished: false,
+            createdDate: (new Date()).getTime(),
+            lastUpdatedDate: (new Date()).getTime(),
+            slug: 'test-title',
+            comments: [testComment]
+          });
+
+          testBlog.save(done);
+        });
+      });
+    });
+  });
+  
   it('Check function for adding comments', function (done) {
 
     var isValidOrg = function(res) {
-      var textCommented = res.body.comments[0].content;
+      var textCommented = res.body.comments[1].content;
       assert.equal(textCommented,'sggge')
     };
     request(app)
-      .post('/api/blogs/' + Blog1._id + '/comments')
+      .post('/api/blogs/' + testBlog._id + '/comments')
+      .set('Authorization', 'JWT ' + tests_config.JWT)
       .send({"contentText":"sggge"})
       .expect(200)
       .expect(isValidOrg)
       .end(done)
   });
-});
 
-/*
- Testing function for deleting the comments
- */
 
-describe('Check for deleting the comments' , function() {
-  var user, Blog2;
-  before(function(done) {
-    user = new User({
-      handle: 'goyarpit123'
-    });
 
-    //user.save(function(){})
+  it('Check function for updating comments', function (done) {
 
-    var comment = new Comment({
-      author: user,
-      content: 'Testing deleting the comment',
-      lastUpdateedDate: (new Date).getTime(),
-      postedDate: ( new Date).getTime()
-    });
-
-    Blog2 = new Blog({
-      author: user,
-      title: 'Blog Title for testing deleteing comments',
-      content: 'This is a sample blog content for test',
-      isPublished: false,
-      comments:[comment],
-      createdDate: (new Date).getTime(),
-      lastUpdatedDate: (new Date).getTime(),
-
-      slug: 'slug3'
-    });
-    Blog2.save(function(err,result) {
-      done();
-
-    });
-  });
-
-  it('Testing for comment id does not exist', function(done){
-
-    request(app)
-      .delete('/api/blogs/' + Blog2._id +'/comments/' + Blog2._id)
-      .expect(200)
-      .expect({error :'Comment does not exist'})
-      .end(done)
-  })
-
-  it('testing for  the comment is deleted',function(done){
     var isValidOrg = function(res) {
-      assert.equal(res.body.comments.length,0)
+      var textCommented = res.body.comments[0].content;
+      console.log("content is " + res.body.comments[0].content);
+      assert.equal(textCommented,'UpdatedContent')
     };
     request(app)
-      .set(request.user)
-      .delete('/api/blogs/' + Blog2._id +'/comments/' + Blog2.comments[0]._id)
+      .put('/api/blogs/' + testBlog._id + '/comments/' + testBlog.comments[0]._id )
+      .set('Authorization', 'JWT ' + tests_config.JWT)
+      .send({"contentText":"UpdatedContent"})
+      .expect(200)
+      .expect(isValidOrg)
+      .end(done)
+  });
+  
+  it('Testing for  the comment Id is deleted',function(done){
+    
+    var isValidOrg = function(res) {
+      assert.equal(res.body.comments.length,1)
+    };
+    request(app)
+      .delete('/api/blogs/' + testBlog._id +'/comments/' + testBlog.comments[0]._id)
+      .set('Authorization', 'JWT ' + tests_config.JWT)
       .expect(200)
       .expect(isValidOrg)
       .end(done)
